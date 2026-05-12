@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Revert FA Theme Changes
-// @namespace   Violentmonkey Scripts
+// @namespace   https://github.com/FenekkuKitsune/UserScripts
 // @icon
 // @version     1.0.0
 //
