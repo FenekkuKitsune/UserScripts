@@ -9,7 +9,7 @@
 // @grant       none
 //
 // @author      FenekkuKitsune
-// @updateURL  https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/SovietWomble%27s%20Video%20Viewer.js
+// @updateURL  https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/SovietWomble's%20Video%20Viewer.js
 // @description Communication script for videos on Soviet's Closet
 // ==/UserScript==
 function waitForElm(selector) {
