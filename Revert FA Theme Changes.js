@@ -8,6 +8,7 @@
 // @grant       none
 //
 // @author      FenekkuKitsune
+// @updateURL	https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Revert%20FA%20Theme%20Changes.js
 // @description Reverts FA's theme changes since early 2026
 // ==/UserScript==
 const viewerRegex = /(\/view\/)[^ ]*/
