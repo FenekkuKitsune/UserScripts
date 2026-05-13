@@ -2,7 +2,7 @@
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
 // @icon
-// @version     1.0.0
+// @version     1.0.1
 //
 // @match       https://www.furaffinity.net/*
 // @grant       none
@@ -13,6 +13,11 @@
 // ==/UserScript==
 const viewerRegex = /(\/view\/)[^ ]*/
 const submissionRegex = /(\/msg\/submissions\/)[^ ]*/
+
+// Inject CSS
+let styles = document.createElement('style');
+styles.textContent = 'a:hover {\n\ttext-decoration: none !important;\n}';
+document.head.appendChild(styles);
 
 if (window.location.pathname.match(viewerRegex)) {
 	// Get the mini gallery navigation
