@@ -2,7 +2,7 @@
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
 // @icon
-// @version     1.0.1
+// @version     1.0.2
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/video/*
@@ -52,46 +52,6 @@ function getCookie(cname) {
 		}
 	}
 	return '';
-}
-
-function secsToTime(seconds) {
-	// Calculate hours + remainder.
-	let pHours = seconds / 3600;
-	let hours = Math.floor(pHours);
-	// Calculate minutes + remainder.
-	let pMins = (pHours - hours) * 60;
-	let mins = Math.floor(pMins);
-	// Finally, calculate seconds.
-	let pSecs = (pMins - mins) * 60;
-	let secs = Math.floor(pSecs);
-
-	// Don't include hours if hours is 0.
-	if (hours > 0) {
-		hours = hours + ':';
-	} else {
-		hours = '';
-	}
-
-	// Minutes is displayed as MM.
-	if (mins < 10 && mins > 0) {
-		mins = '0' + mins;
-	} else if (mins == 0) {
-		mins = '00';
-	}
-
-	// Seconds is displayed as SS.
-	if (secs < 10 && secs > 0) {
-		secs = '0' + secs;
-	} else if (secs == 0) {
-		secs = '00';
-	}
-
-	// Return time as H:MM:SS, with hours only included if applicable.
-	return hours + mins + ':' + secs;
-}
-
-function timeToSecs(hours, mins, secs) {
-	return secs + mins * 60 + hours * 3600;
 }
 
 function updateSeekTime(frame, time) {
