@@ -2,7 +2,7 @@
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
 // @icon
-// @version     1.0.1
+// @version     1.0.2
 //
 // @match       https://www.furaffinity.net/*
 // @grant       none
@@ -11,13 +11,16 @@
 // @updateURL	https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Revert%20FA%20Theme%20Changes.js
 // @description Reverts FA's theme changes since early 2026
 // ==/UserScript==
-const viewerRegex = /(\/view\/)[^ ]*/
-const submissionRegex = /(\/msg\/submissions\/)[^ ]*/
+const viewerRegex = /(\/view\/)[^ ]*/ // Submission viewer pages
+const submissionRegex = /(\/msg\/submissions\/)[^ ]*/ // Submission feed pages
 
 // Inject CSS
 let styles = document.createElement('style');
-styles.textContent = 'a:hover {\n\ttext-decoration: none !important;\n}';
-document.head.appendChild(styles);
+styles.textContent = `/* Revert text-decoration changes to links. */
+a:hover {
+	text-decoration: none !important;
+}`;
+document.head.append(styles);
 
 if (window.location.pathname.match(viewerRegex)) {
 	// Get the mini gallery navigation
