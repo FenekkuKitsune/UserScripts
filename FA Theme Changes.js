@@ -9,7 +9,7 @@
 //
 // @author      FenekkuKitsune
 // @updateURL	https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/FA%20Theme%20Changes.js
-// @description Reverts FA's theme changes since early 2026
+// @description Reverting early 2026 theme changes, plus adding my own changes
 // ==/UserScript==
 const viewerRegex = /(\/view\/)[^ ]*/ // Submission viewer pages
 const submissionRegex = /(\/msg\/submissions\/)[^ ]*/ // Submission feed pages
