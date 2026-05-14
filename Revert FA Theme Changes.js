@@ -8,7 +8,7 @@
 // @grant       none
 //
 // @author      FenekkuKitsune
-// @updateURL	https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Revert%20FA%20Theme%20Changes.js
+// @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Revert%20FA%20Theme%20Changes.js
 // @description Reverting early 2026 theme changes, plus adding my own changes
 // ==/UserScript==
 const viewerRegex = /(\/view\/)[^ ]*/ // Submission viewer pages
