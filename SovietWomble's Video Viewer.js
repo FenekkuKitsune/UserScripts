@@ -2,7 +2,7 @@
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
 // @icon
-// @version     1.0.0
+// @version     1.0.1
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/video/*
@@ -112,7 +112,7 @@ function createDoneButton(addTo) {
 	// button.setAttribute('onclick', 'markDone(this)');
 	span.textContent = 'Mark Completed';
 
-	button.appendChild(span);
+	button.append(span);
 	addTo.prepend(button);
 
 	button.onclick = function() {
@@ -127,11 +127,13 @@ function createDoneButton(addTo) {
 }
 
 if (window.location.pathname.match(/\/embed\/5105\/[^ ]*/)) {
+	// Wait for the seek bar to load, then observe it for changes to the current time.
 	waitForElm('input[data-plyr*="seek"').then((elm) => {
 		const vidObserver = new MutationObserver(function (mutations) {
 			mutations.forEach(function (mutation) {
 				if (mutation.type === 'attributes') {
 					if (mutation.attributeName === 'aria-valuenow') {
+						// Communicate the current time to the parent window.
 						window.parent.postMessage(
 							{ prog: mutation.target.getAttribute('aria-valuenow') },
 							'https://sovietscloset.com'
@@ -148,9 +150,21 @@ if (window.location.pathname.match(/\/embed\/5105\/[^ ]*/)) {
 }
 if (window.location.pathname.match(/\/video\/[^ ]*/)) {
 	// Inject CSS
-	let styles = document.createElement('style');
-	styles.textContent = '#markDone {\n\tposition: absolute;\n\ttop: 0.35em;\n\tright: 0.5em;\n}\n\n.container {\n\tmax-width: none;\n}\n\n.flex > div:nth-child(2) {\n\tpadding-top: 85vh !important;\n}';
-	document.head.appendChild(styles);
+	var styles = document.createElement('style');
+	styles.textContent = `#markDone {
+		position: absolute;
+		top: 0.35em;
+		right: 0.5em;
+	}
+
+	.container {
+		max-width: none;
+	}
+	
+	.flex > div:nth-child(2) {
+		padding-top: 85vh !important;
+	}`;
+	document.head.append(styles);
 
 	// Get video titles
 	var listTitle = document.getElementsByTagName('h2')[0].textContent;
