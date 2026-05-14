@@ -2,7 +2,7 @@
 // @name        FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
 // @icon
-// @version     1.0.4
+// @version     1.1.0
 //
 // @match       https://www.furaffinity.net/*
 // @grant       none
@@ -68,6 +68,13 @@ if (window.location.pathname.match(viewerRegex)) {
 			buttonNav.append(buttonOlder);
 		}
 	}
+
+	// Username container
+	var username = document.getElementsByClassName('c-usernameBlockSimple')[0].parentElement;
+
+	// Move the username container to be on the same line as the post date/time
+	var postTime = document.getElementsByClassName('popup_date')[0];
+	postTime.parentElement.append(username);
 }
 if (window.location.pathname.match(submissionRegex)) {
 	// Get the problematic gallery buttons div
