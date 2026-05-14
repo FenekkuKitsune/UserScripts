@@ -1,14 +1,14 @@
 // ==UserScript==
-// @name        FA Theme Changes
+// @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
 // @icon
-// @version     1.1.0
+// @version     1.4
 //
 // @match       https://www.furaffinity.net/*
 // @grant       none
 //
 // @author      FenekkuKitsune
-// @updateURL	https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/FA%20Theme%20Changes.js
+// @updateURL	https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Revert%20FA%20Theme%20Changes.js
 // @description Reverting early 2026 theme changes, plus adding my own changes
 // ==/UserScript==
 const viewerRegex = /(\/view\/)[^ ]*/ // Submission viewer pages
@@ -68,13 +68,6 @@ if (window.location.pathname.match(viewerRegex)) {
 			buttonNav.append(buttonOlder);
 		}
 	}
-
-	// Username container
-	var username = document.getElementsByClassName('c-usernameBlockSimple')[0].parentElement;
-
-	// Move the username container to be on the same line as the post date/time
-	var postTime = document.getElementsByClassName('popup_date')[0];
-	postTime.parentElement.append(username);
 }
 if (window.location.pathname.match(submissionRegex)) {
 	// Get the problematic gallery buttons div
