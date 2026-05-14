@@ -15,7 +15,7 @@ const viewerRegex = /(\/view\/)[^ ]*/ // Submission viewer pages
 const submissionRegex = /(\/msg\/submissions\/)[^ ]*/ // Submission feed pages
 
 // Inject CSS
-let styles = document.createElement('style');
+var styles = document.createElement('style');
 styles.textContent = `/* Revert text-decoration changes to links. */
 a:hover {
 	text-decoration: none !important;
@@ -24,13 +24,13 @@ document.head.append(styles);
 
 if (window.location.pathname.match(viewerRegex)) {
 	// Get the mini gallery navigation
-	let galleryNav = document.getElementsByClassName('minigallery-navigation')[0];
+	var galleryNav = document.getElementsByClassName('minigallery-navigation')[0];
 
 	// Nav buttons, only run if the mini gallery exists
 	if (galleryNav) {
-		let navButtons = galleryNav.getElementsByTagName('a');
-		let navNewer;
-		let navOlder;
+		var navButtons = galleryNav.getElementsByTagName('a');
+		var navNewer;
+		var navOlder;
 
 		// Find the 'new' buttons. There's better ways to do this, but eh, who cares.
 		for (var i = 0; i < navButtons.length; i++) {
@@ -45,14 +45,14 @@ if (window.location.pathname.match(viewerRegex)) {
 		galleryNav.style.display = 'none';
 
 		// Grab the submission buttons div
-		let buttonNav = document.getElementById('submission-options');
+		var buttonNav = document.getElementById('submission-options');
 
 		// Grab classes from the existing submission buttons, for visual consistency
-		let classes = buttonNav.getElementsByTagName('a')[0].classList;
+		var classes = buttonNav.getElementsByTagName('a')[0].classList;
 
 		// Recreate the 'Newer' button if it exists
 		if (navNewer) {
-			let buttonNewer = document.createElement('a');
+			var buttonNewer = document.createElement('a');
 			buttonNewer.className = classes;
 			buttonNewer.setAttribute('href', navNewer.href);
 			buttonNewer.textContent = 'Newer';
@@ -61,7 +61,7 @@ if (window.location.pathname.match(viewerRegex)) {
 
 		// Recreate the 'Older' button if it exists
 		if (navOlder) {
-			let buttonOlder = document.createElement('a');
+			var buttonOlder = document.createElement('a');
 			buttonOlder.className = classes;
 			buttonOlder.setAttribute('href', navOlder.href);
 			buttonOlder.textContent = 'Older';
@@ -71,7 +71,7 @@ if (window.location.pathname.match(viewerRegex)) {
 }
 if (window.location.pathname.match(submissionRegex)) {
 	// Get the problematic gallery buttons div
-	let messagenav = document.getElementsByClassName('messagecenter-navigation')[0];
+	var messagenav = document.getElementsByClassName('messagecenter-navigation')[0];
 
 	// Remove the problematic inline css from the div
 	messagenav.style.lineHeight = '';
