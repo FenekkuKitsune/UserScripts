@@ -2,7 +2,7 @@
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
 // @icon
-// @version     1.0.2
+// @version     1.0.3
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/video/*
@@ -86,7 +86,10 @@ function createDoneButton(addTo) {
 	}
 }
 
-if (window.location.pathname.match(/\/embed\/5105\/[^ ]*/)) {
+const mediaDelivery = new URLPattern({ hostname: 'iframe.mediadelivery.net', pathname: '/embed/5105/*' });
+const sovietsCloset = new URLPattern({ hostname: 'sovietscloset.com', pathname: '/video/*' });
+
+if (mediaDelivery.test(window.location)) {
 	// Wait for the seek bar to load, then observe it for changes to the current time.
 	waitForElm('input[data-plyr*="seek"').then((elm) => {
 		const vidObserver = new MutationObserver(function (mutations) {
@@ -108,7 +111,7 @@ if (window.location.pathname.match(/\/embed\/5105\/[^ ]*/)) {
 		});
 	})
 }
-if (window.location.pathname.match(/\/video\/[^ ]*/)) {
+if (sovietsCloset.test(window.location)) {
 	// Inject CSS
 	var styles = document.createElement('style');
 	styles.textContent = `#markDone {
