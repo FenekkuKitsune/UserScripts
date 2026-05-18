@@ -2,7 +2,7 @@
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
 // @icon
-// @version     1.0.4
+// @version     2.0.0
 //
 // @match       https://www.furaffinity.net/*
 // @grant       none
@@ -11,9 +11,6 @@
 // @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Revert%20FA%20Theme%20Changes.js
 // @description Reverting early 2026 theme changes, plus adding my own changes
 // ==/UserScript==
-const viewerRegex = /(\/view\/)[^ ]*/ // Submission viewer pages
-const submissionRegex = /(\/msg\/submissions\/)[^ ]*/ // Submission feed pages
-
 // Inject CSS
 var styles = document.createElement('style');
 styles.textContent = `/* Revert text-decoration changes to links. */
@@ -22,7 +19,7 @@ a:hover {
 }`;
 document.head.append(styles);
 
-if (window.location.pathname.match(viewerRegex)) {
+if (window.location.pathname.match(/(\/view\/)[^ ]*/)) { // Submission viewer pages
 	// Get the mini gallery navigation
 	var galleryNav = document.getElementsByClassName('minigallery-navigation')[0];
 
@@ -68,11 +65,4 @@ if (window.location.pathname.match(viewerRegex)) {
 			buttonNav.append(buttonOlder);
 		}
 	}
-}
-if (window.location.pathname.match(submissionRegex)) {
-	// Get the problematic gallery buttons div
-	var messagenav = document.getElementsByClassName('messagecenter-navigation')[0];
-
-	// Remove the problematic inline css from the div
-	messagenav.style.lineHeight = '';
 }
