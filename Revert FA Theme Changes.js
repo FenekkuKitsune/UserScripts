@@ -2,15 +2,17 @@
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
 // @icon
-// @version     2.0.0
+// @version     2.0.1
 //
-// @match       https://www.furaffinity.net/*
+// @match       https://www.furaffinity.net/view/*
 // @grant       none
 //
 // @author      FenekkuKitsune
 // @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Revert%20FA%20Theme%20Changes.js
 // @description Reverting early 2026 theme changes, plus adding my own changes
 // ==/UserScript==
+const submissionViewer = new URLPattern({ pathname: '/view/*'});
+
 // Inject CSS
 var styles = document.createElement('style');
 styles.textContent = `/* Revert text-decoration changes to links. */
@@ -19,7 +21,7 @@ a:hover {
 }`;
 document.head.append(styles);
 
-if (window.location.pathname.match(/(\/view\/)[^ ]*/)) { // Submission viewer pages
+if (submissionViewer.test(window.location)) {
 	// Get the mini gallery navigation
 	var galleryNav = document.getElementsByClassName('minigallery-navigation')[0];
 
