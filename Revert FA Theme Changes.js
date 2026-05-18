@@ -2,7 +2,7 @@
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
 // @icon
-// @version     1.4
+// @version     1.0.4
 //
 // @match       https://www.furaffinity.net/*
 // @grant       none
