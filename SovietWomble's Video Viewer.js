@@ -2,11 +2,12 @@
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
 // @icon
-// @version     1.0.3
+// @version     2.0.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/video/*
-// @grant       none
+// @grant       GM_addStyle
+// @grant       GM_addElement
 //
 // @author      FenekkuKitsune
 // @updateURL  https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/SovietWomble's%20Video%20Viewer.js
@@ -59,20 +60,16 @@ function updateSeekTime(frame, time) {
 }
 
 function createDoneButton(addTo) {
-	let button = document.createElement('button');
-	let span = document.createElement('span');
+	let button = GM_addElement('button', {
+		id: 'markDone',
+		class: 'v-btn v-btn--outlined theme--dark v-size--default',
+		type: 'button'
+	})
+	let span = GM_addElement(button, 'span', {
+		class: 'v-btn__content',
+		textContent: 'Mark Completed'
+	})
 
-	// Set element styles to be the same as the existing buttons
-	button.id = 'markDone';
-	button.classList = 'v-btn v-btn--outlined theme--dark v-size--default';
-	span.classList = 'v-btn__content';
-
-	// Set extra details
-	button.setAttribute('type', 'button');
-	// button.setAttribute('onclick', 'markDone(this)');
-	span.textContent = 'Mark Completed';
-
-	button.append(span);
 	addTo.prepend(button);
 
 	button.onclick = function() {
@@ -112,22 +109,19 @@ if (mediaDelivery.test(window.location)) {
 	})
 }
 if (sovietsCloset.test(window.location)) {
-	// Inject CSS
-	var styles = document.createElement('style');
-	styles.textContent = `#markDone {
-		position: absolute;
-		top: 0.35em;
-		right: 0.5em;
-	}
+	var styles = GM_addStyle(`#markDone {
+	position: absolute;
+	top: 0.35em;
+	right: 0.5em;
+}
 
-	.container {
-		max-width: none;
-	}
-	
-	.flex > div:nth-child(2) {
-		padding-top: 85vh !important;
-	}`;
-	document.head.append(styles);
+.container {
+	max-width: none;
+}
+
+.flex > div:nth-child(2) {
+	padding-top: 85vh !important;
+}`);
 
 	// Get video titles
 	var listTitle = document.getElementsByTagName('h2')[0].textContent;

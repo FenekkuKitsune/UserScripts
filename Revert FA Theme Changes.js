@@ -2,24 +2,23 @@
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
 // @icon
-// @version     2.0.1
+// @version     3.0.0
 //
 // @match       https://www.furaffinity.net/view/*
-// @grant       none
+// @grant       GM_addStyle
+// @grant       GM_addElement
 //
 // @author      FenekkuKitsune
 // @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Revert%20FA%20Theme%20Changes.js
-// @description Reverting early 2026 theme changes, plus adding my own changes
+// @description Reverting and fixing early 2026 theme changes.
 // ==/UserScript==
 const submissionViewer = new URLPattern({ pathname: '/view/*'});
 
 // Inject CSS
-var styles = document.createElement('style');
-styles.textContent = `/* Revert text-decoration changes to links. */
+const styles = GM_addStyle(`/* Revert text-decoration changes to links. */
 a:hover {
 	text-decoration: none !important;
-}`;
-document.head.append(styles);
+}`);
 
 if (submissionViewer.test(window.location)) {
 	// Get the mini gallery navigation
@@ -46,25 +45,26 @@ if (submissionViewer.test(window.location)) {
 		// Grab the submission buttons div
 		var buttonNav = document.getElementById('submission-options');
 
-		// Grab classes from the existing submission buttons, for visual consistency
-		var classes = buttonNav.getElementsByTagName('a')[0].classList;
+		// Grab classes from the existing submission buttons, for visual consistency. Convert classlist to string.
+		var classes = buttonNav.getElementsByTagName('a')[0].classList + '';
 
 		// Recreate the 'Newer' button if it exists
 		if (navNewer) {
-			var buttonNewer = document.createElement('a');
-			buttonNewer.className = classes;
-			buttonNewer.setAttribute('href', navNewer.href);
-			buttonNewer.textContent = 'Newer';
+			var buttonNewer = GM_addElement('a', {
+				class: classes,
+				href: navNewer.href,
+				textContent: 'Newer'
+			})
 			buttonNav.prepend(buttonNewer);
 		}
 
 		// Recreate the 'Older' button if it exists
 		if (navOlder) {
-			var buttonOlder = document.createElement('a');
-			buttonOlder.className = classes;
-			buttonOlder.setAttribute('href', navOlder.href);
-			buttonOlder.textContent = 'Older';
-			buttonNav.append(buttonOlder);
+			var buttonOlder = GM_addElement(buttonNav, 'a', {
+				class: classes,
+				href: navOlder.href,
+				textContent: 'Older'
+			})
 		}
 	}
 }
