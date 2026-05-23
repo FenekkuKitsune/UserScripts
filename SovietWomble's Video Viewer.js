@@ -1,8 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @icon
-// @version     2.0.0
+// @version     2.0.1
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/video/*
@@ -10,7 +9,7 @@
 // @grant       GM_addElement
 //
 // @author      FenekkuKitsune
-// @updateURL  https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/SovietWomble's%20Video%20Viewer.js
+// @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/SovietWomble's%20Video%20Viewer.js
 // @description Communication script for videos on Soviet's Closet
 // ==/UserScript==
 function waitForElm(selector) {
@@ -109,7 +108,8 @@ if (mediaDelivery.test(window.location)) {
 	})
 }
 if (sovietsCloset.test(window.location)) {
-	var styles = GM_addStyle(`#markDone {
+	var styles = GM_addStyle(`
+#markDone {
 	position: absolute;
 	top: 0.35em;
 	right: 0.5em;
