@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     2.1.1
+// @version     2.1.2
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/video/*
@@ -100,15 +100,20 @@ function vidControl(control) {
 }
 
 function handleKey(e) {
+	let hotkeys = {
+		rewind: 'ArrowLeft',
+		fastForward: 'ArrowRight',
+		play: 'KeyK'
+	}
 	if (mediaDelivery.test(window.location)) {
 		switch (e.code) {
-			case 'ArrowRight':
+			case hotkeys.rewind:
 				vidControl('rewind');
 				break;
-			case 'ArrowLeft':
+			case hotkeys.fastForward:
 				vidControl('fast-forward');
 				break;
-			case 'Space':
+			case hotkeys.play:
 				vidControl('play');
 				break;
 		}
@@ -117,13 +122,13 @@ function handleKey(e) {
 		let vidFrame = document.getElementsByTagName('iframe')[0].contentWindow
 		let sendControl = '';
 		switch (e.code) {
-			case 'ArrowRight':
+			case hotkeys.rewind:
 				sendControl = 'rewind';
 				break;
-			case 'ArrowLeft':
+			case hotkeys.fastForward:
 				sendControl = 'fast-forward';
 				break;
-			case 'Space':
+			case hotkeys.play:
 				sendControl = 'play';
 				break;
 		}
