@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     2.0.1
+// @version     2.1.1
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/video/*
@@ -12,6 +12,9 @@
 // @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/SovietWomble's%20Video%20Viewer.js
 // @description Communication script for videos on Soviet's Closet
 // ==/UserScript==
+const mediaDelivery = new URLPattern({ hostname: 'iframe.mediadelivery.net', pathname: '/embed/5105/*' });
+const sovietsCloset = new URLPattern({ hostname: 'sovietscloset.com', pathname: '/video/*' });
+
 function waitForElm(selector) {
 	return new Promise(resolve => {
 		if (document.querySelector(selector)) {
@@ -82,8 +85,54 @@ function createDoneButton(addTo) {
 	}
 }
 
-const mediaDelivery = new URLPattern({ hostname: 'iframe.mediadelivery.net', pathname: '/embed/5105/*' });
-const sovietsCloset = new URLPattern({ hostname: 'sovietscloset.com', pathname: '/video/*' });
+function vidControl(control) {
+	switch (control) {
+		case 'play':
+			document.querySelector('button[data-plyr="play"]').click();
+			break;
+		case 'rewind':
+			document.querySelector('button[data-plyr="rewind"]').click();
+			break;
+		case 'fast-forward':
+			document.querySelector('button[data-plyr="fast-forward"]').click();
+			break;
+	}
+}
+
+function handleKey(e) {
+	if (mediaDelivery.test(window.location)) {
+		switch (e.code) {
+			case 'ArrowRight':
+				vidControl('rewind');
+				break;
+			case 'ArrowLeft':
+				vidControl('fast-forward');
+				break;
+			case 'Space':
+				vidControl('play');
+				break;
+		}
+	}
+	if (sovietsCloset.test(window.location)) {
+		let vidFrame = document.getElementsByTagName('iframe')[0].contentWindow
+		let sendControl = '';
+		switch (e.code) {
+			case 'ArrowRight':
+				sendControl = 'rewind';
+				break;
+			case 'ArrowLeft':
+				sendControl = 'fast-forward';
+				break;
+			case 'Space':
+				sendControl = 'play';
+				break;
+		}
+
+		if (sendControl) {
+			vidFrame.postMessage({ control: sendControl }, 'https://iframe.mediadelivery.net');
+		}
+	}
+}
 
 if (mediaDelivery.test(window.location)) {
 	// Wait for the seek bar to load, then observe it for changes to the current time.
@@ -106,6 +155,17 @@ if (mediaDelivery.test(window.location)) {
 			attributes: true,
 		});
 	})
+
+	// Listen for keypresses to control the video.
+	window.addEventListener('keydown', handleKey);
+
+	window.addEventListener('message', (e) => {
+		if (e.origin == 'https://sovietscloset.com') {
+			if (e.data.hasOwnProperty('control')) {
+				vidControl(e.data.control);
+			}
+		}
+	});
 }
 if (sovietsCloset.test(window.location)) {
 	var styles = GM_addStyle(`
@@ -135,6 +195,9 @@ if (sovietsCloset.test(window.location)) {
 	var cookieName = listTitle + ' / ' + videoTitle;
 	var progCookie = Math.floor(getCookie(cookieName));
 	var trackProgress = true;
+
+	// Listen for keypresses to control the video.
+	window.addEventListener('keydown', handleKey);
 
 	// Listen for video progress from iframe
 	window.addEventListener('message', (e) => {
