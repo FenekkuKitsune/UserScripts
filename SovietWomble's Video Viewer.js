@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     2.1.3
+// @version     2.2.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/video/*
@@ -104,36 +104,39 @@ function vidControl(control) {
 
 function handleKey(e) {
 	let hotkeys = {
-		rewind: 'ArrowLeft',
-		fastForward: 'ArrowRight',
-		play: 'KeyK'
+		rewind: ['ArrowLeft'],
+		fastForward: ['ArrowRight'],
+		play: ['KeyK', 'Space']
 	}
 	if (mediaDelivery.test(window.location)) {
-		switch (e.code) {
-			case hotkeys.rewind:
-				vidControl('rewind');
-				break;
-			case hotkeys.fastForward:
-				vidControl('fast-forward');
-				break;
-			case hotkeys.play:
-				vidControl('play');
-				break;
+		if (hotkeys.rewind.includes(e.code)) {
+			vidControl('rewind');
+			e.preventDefault();
+		}
+		if (hotkeys.fastForward.includes(e.code)) {
+			vidControl('fast-forward');
+			e.preventDefault();
+		}
+		if (hotkeys.play.includes(e.code)) {
+			vidControl('play');
+			e.preventDefault();
 		}
 	}
 	if (sovietsCloset.test(window.location)) {
 		let vidFrame = document.getElementsByTagName('iframe')[0].contentWindow
 		let sendControl = '';
-		switch (e.code) {
-			case hotkeys.rewind:
-				sendControl = 'rewind';
-				break;
-			case hotkeys.fastForward:
-				sendControl = 'fast-forward';
-				break;
-			case hotkeys.play:
-				sendControl = 'play';
-				break;
+
+		if (hotkeys.rewind.includes(e.code)) {
+			sendControl = 'rewind';
+			e.preventDefault();
+		}
+		if (hotkeys.fastForward.includes(e.code)) {
+			sendControl = 'fast-forward';
+			e.preventDefault();
+		}
+		if (hotkeys.play.includes(e.code)) {
+			sendControl = 'play';
+			e.preventDefault();
 		}
 
 		if (sendControl) {
