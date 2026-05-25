@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     2.1.2
+// @version     2.1.3
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/video/*
@@ -79,9 +79,12 @@ function createDoneButton(addTo) {
 
 		setCookie(cookieName, '-1', '-1');
 
-		console.log('Cookie "' + cookieName + '" deleted');
-
-		this.style.backgroundColor = 'green';
+		if (getCookie(cookieName) === '') {
+			this.style.backgroundColor = 'green';
+		} else {
+			this.style.backgroundColor = 'red';
+			console.error('Failed to delete cookie ' + cookieName);
+		}
 	}
 }
 
