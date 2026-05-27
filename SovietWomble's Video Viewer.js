@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.1.0
+// @version     3.1.1
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -50,37 +50,6 @@ function waitForElm(selector) {
 			subtree: true
 		});
 	});
-}
-
-function updateSeekTime(frame, time) {
-	frame.setAttribute('src', frame.getAttribute('src') + '&t=' + time);
-}
-
-function createDoneButton(addTo) {
-	let button = GM_addElement('button', {
-		id: 'markDone',
-		class: 'v-btn v-btn--outlined theme--dark v-size--default',
-		type: 'button'
-	})
-	let span = GM_addElement(button, 'span', {
-		class: 'v-btn__content',
-		textContent: 'Mark Completed'
-	})
-
-	addTo.prepend(button);
-
-	button.onclick = function() {
-		trackProgress = false;
-
-		setCookie(cookieName, '-1', '-1');
-
-		if (getCookie(cookieName) === '') {
-			this.style.backgroundColor = 'green';
-		} else {
-			this.style.backgroundColor = 'red';
-			console.error('Failed to delete cookie ' + cookieName);
-		}
-	}
 }
 
 function vidControl(control) {
@@ -186,6 +155,37 @@ if (sovietsCloset.test(window.location)) {
 	}
 
 	if (sovietsVideos.test(window.location)) {
+		function updateSeekTime(frame, time) {
+			frame.setAttribute('src', frame.getAttribute('src') + '&t=' + time);
+		}
+
+		function createDoneButton(addTo) {
+			let button = GM_addElement('button', {
+				id: 'markDone',
+				class: 'v-btn v-btn--outlined theme--dark v-size--default',
+				type: 'button'
+			})
+			let span = GM_addElement(button, 'span', {
+				class: 'v-btn__content',
+				textContent: 'Mark Completed'
+			})
+
+			addTo.prepend(button);
+
+			button.onclick = function() {
+				trackProgress = false;
+
+				setCookie(cookieName, '-1', '-1');
+
+				if (getCookie(cookieName) === '') {
+					this.style.backgroundColor = 'green';
+				} else {
+					this.style.backgroundColor = 'red';
+					console.error('Failed to delete cookie ' + cookieName);
+				}
+			}
+		}
+
 		// Get video details
 		var vidID = window.location.pathname.match(/\d+/)[0];
 		var vidTitle = document.getElementsByTagName('h2')[0].textContent + ' - ' + document.getElementsByTagName('h3')[0].textContent;
