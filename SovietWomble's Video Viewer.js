@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     2.2.0
+// @version     3.0.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/video/*
@@ -33,28 +33,6 @@ function waitForElm(selector) {
 			subtree: true
 		});
 	});
-}
-
-function setCookie(cname, cvalue, exdays) {
-	const d = new Date();
-	d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
-	let expires = 'expires=' + d.toUTCString();
-	document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/';
-}
-
-function getCookie(cname) {
-	let name = cname + '=';
-	let ca = document.cookie.split(';');
-	for (let i = 0; i < ca.length; i++) {
-		let c = ca[i];
-		while (c.charAt(0) == ' ') {
-			c = c.substring(1);
-		}
-		if (c.indexOf(name) == 0) {
-			return c.substring(name.length, c.length);
-		}
-	}
-	return '';
 }
 
 function updateSeekTime(frame, time) {
@@ -154,7 +132,10 @@ if (mediaDelivery.test(window.location)) {
 					if (mutation.attributeName === 'aria-valuenow') {
 						// Communicate the current time to the parent window.
 						window.parent.postMessage(
-							{ prog: mutation.target.getAttribute('aria-valuenow') },
+							{
+								prog: mutation.target.getAttribute('aria-valuenow'),
+								max: mutation.target.getAttribute('aria-valuemax')
+							},
 							'https://sovietscloset.com'
 						);
 					}
@@ -194,17 +175,27 @@ if (sovietsCloset.test(window.location)) {
 	padding-top: 85vh !important;
 }`);
 
-	// Get video titles
-	var listTitle = document.getElementsByTagName('h2')[0].textContent;
-	var videoTitle = document.getElementsByTagName('h3')[0].textContent;
+	// Get video details
+	var vidID = window.location.pathname.match(/\d+/)[0];
+	var vidTitle = document.getElementsByTagName('h2')[0].textContent + ' - ' + document.getElementsByTagName('h3')[0].textContent;
 	// Get the iframe that the video runs in.
 	var vidFrame = document.getElementsByTagName('iframe')[0];
 	var vidLoadTimeout = 250;
 	// Get the video navigation buttons
 	var navButtons = document.getElementsByClassName('layout')[0];
-	// Cookie details
-	var cookieName = listTitle + ' / ' + videoTitle;
-	var progCookie = Math.floor(getCookie(cookieName));
+	// Recall video progress, if any
+	var videos = JSON.parse(localStorage.getItem('videoProgress'));
+	if (videos == null) {
+		videos = {};
+	}
+	if (!videos[vidID]) {
+		videos[vidID] = {
+			title: vidTitle,
+			progress: 0,
+			max: -1,
+			done: false
+		};
+	}
 	var trackProgress = true;
 
 	// Listen for keypresses to control the video.
@@ -216,10 +207,10 @@ if (sovietsCloset.test(window.location)) {
 			if (e.data.hasOwnProperty('prog') && trackProgress) {
 				let vidProgress = Math.floor(e.data.prog);
 
-				if (vidProgress > progCookie) {
-					progCookie = e.data.prog;
-
-					setCookie(cookieName, e.data.prog, '12');
+				if (vidProgress > videos[vidID].progress) {
+					videos[vidID].progress = vidProgress;
+					videos[vidID].max = Math.floor(e.data.max);
+					localStorage.setItem('videoProgress', JSON.stringify(videos));
 				}
 			}
 		}
@@ -231,17 +222,23 @@ if (sovietsCloset.test(window.location)) {
 			trackProgress = true;
 
 			setTimeout(() => {
-				listTitle = document.getElementsByTagName('h2')[0].textContent;
-				videoTitle = document.getElementsByTagName('h3')[0].textContent;
+				// Update video details
+				vidID = window.location.pathname.match(/\d+/)[0];
+				vidTitle = document.getElementsByTagName('h2')[0].textContent + ' - ' + document.getElementsByTagName('h3')[0].textContent;
 
-				cookieName = listTitle + ' / ' + videoTitle;
-
-				progCookie = Math.floor(getCookie(cookieName));
+				if (!videos[vidID]) {
+					videos[vidID] = {
+						title: vidTitle,
+						progress: 0,
+						max: -1,
+						done: false
+					};
+				}
 
 				vidFrame = document.getElementsByTagName('iframe')[0];
 
-				if (progCookie > 0) {
-					updateSeekTime(vidFrame, progCookie);
+				if (videos[vidID].progress > 0) {
+					updateSeekTime(vidFrame, videos[vidID].progress);
 				}
 
 				navButtons = document.getElementsByClassName('layout')[0];
@@ -253,8 +250,8 @@ if (sovietsCloset.test(window.location)) {
 
 	// Update the page after the DOM fully loads.
 	setTimeout(() => {
-		if (progCookie > 0) {
-			updateSeekTime(vidFrame, progCookie);
+		if (videos[vidID].progress > 0) {
+			updateSeekTime(vidFrame, videos[vidID].progress);
 		}
 
 		createDoneButton(navButtons);
