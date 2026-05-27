@@ -1,19 +1,36 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.0.0
+// @version     3.1.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
-// @match       https://sovietscloset.com/video/*
+// @match       https://sovietscloset.com/*
 // @grant       GM_addStyle
 // @grant       GM_addElement
 //
 // @author      FenekkuKitsune
 // @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/SovietWomble's%20Video%20Viewer.js
-// @description Communication script for videos on Soviet's Closet
+// @description Video progress tracking and hotkeys for SovietWomble's VOD archive.
 // ==/UserScript==
 const mediaDelivery = new URLPattern({ hostname: 'iframe.mediadelivery.net', pathname: '/embed/5105/*' });
-const sovietsCloset = new URLPattern({ hostname: 'sovietscloset.com', pathname: '/video/*' });
+const sovietsCloset = new URLPattern({ hostname: 'sovietscloset.com'});
+const sovietsVideos = new URLPattern({ pathname: '/video/*'});
+const sovietsStyles = `
+#markDone {
+	position: absolute; top: 0.35em; right: 0.5em;
+}
+
+.container {
+	max-width: none;
+}
+
+.flex > div:has(iframe) {
+	padding-top: 85vh !important;
+}
+
+.v-finished {
+	color: green
+}`;
 
 function waitForElm(selector) {
 	return new Promise(resolve => {
@@ -160,100 +177,161 @@ if (mediaDelivery.test(window.location)) {
 	});
 }
 if (sovietsCloset.test(window.location)) {
-	var styles = GM_addStyle(`
-#markDone {
-	position: absolute;
-	top: 0.35em;
-	right: 0.5em;
-}
+	var styles = GM_addStyle(sovietsStyles);
+	var elLoadTimeout = 250;
 
-.container {
-	max-width: none;
-}
-
-.flex > div:nth-child(2) {
-	padding-top: 85vh !important;
-}`);
-
-	// Get video details
-	var vidID = window.location.pathname.match(/\d+/)[0];
-	var vidTitle = document.getElementsByTagName('h2')[0].textContent + ' - ' + document.getElementsByTagName('h3')[0].textContent;
-	// Get the iframe that the video runs in.
-	var vidFrame = document.getElementsByTagName('iframe')[0];
-	var vidLoadTimeout = 250;
-	// Get the video navigation buttons
-	var navButtons = document.getElementsByClassName('layout')[0];
-	// Recall video progress, if any
 	var videos = JSON.parse(localStorage.getItem('videoProgress'));
 	if (videos == null) {
 		videos = {};
 	}
-	if (!videos[vidID]) {
-		videos[vidID] = {
-			title: vidTitle,
-			progress: 0,
-			max: -1,
-			done: false
-		};
-	}
-	var trackProgress = true;
 
-	// Listen for keypresses to control the video.
-	window.addEventListener('keydown', handleKey);
+	if (sovietsVideos.test(window.location)) {
+		// Get video details
+		var vidID = window.location.pathname.match(/\d+/)[0];
+		var vidTitle = document.getElementsByTagName('h2')[0].textContent + ' - ' + document.getElementsByTagName('h3')[0].textContent;
+		// Get the iframe that the video runs in.
+		var vidFrame = document.getElementsByTagName('iframe')[0];
+		// Get the video navigation buttons
+		var navButtons = document.getElementsByClassName('layout')[0];
+		// Recall video progress, if any
+		if (!videos[vidID]) {
+			videos[vidID] = {
+				title: vidTitle,
+				progress: 0,
+				max: -1,
+				done: false
+			};
+		}
+		var trackProgress = true;
 
-	// Listen for video progress from iframe
-	window.addEventListener('message', (e) => {
-		if (e.origin == 'https://iframe.mediadelivery.net') {
-			if (e.data.hasOwnProperty('prog') && trackProgress) {
-				let vidProgress = Math.floor(e.data.prog);
+		// Listen for keypresses to control the video.
+		window.addEventListener('keydown', handleKey);
 
-				if (vidProgress > videos[vidID].progress) {
-					videos[vidID].progress = vidProgress;
-					videos[vidID].max = Math.floor(e.data.max);
-					localStorage.setItem('videoProgress', JSON.stringify(videos));
+		// Listen for video progress from iframe
+		window.addEventListener('message', (e) => {
+			if (e.origin == 'https://iframe.mediadelivery.net') {
+				if (e.data.hasOwnProperty('prog') && trackProgress) {
+					let vidProgress = Math.floor(e.data.prog);
+
+					if (vidProgress > videos[vidID].progress) {
+						videos[vidID].progress = Math.floor(e.data.prog);
+						videos[vidID].max = Math.floor(e.data.max);
+						localStorage.setItem('videoProgress', JSON.stringify(videos));
+					}
+				}
+			}
+		});
+
+		// Update variables and elements as the webpage is navigated.
+		window.navigation.addEventListener('navigate', (e) => {
+			if (e.destination.url.startsWith('https://sovietscloset.com/video/')) {
+				trackProgress = true;
+
+				setTimeout(() => {
+					// Update video details
+					vidID = window.location.pathname.match(/\d+/)[0];
+					vidTitle = document.getElementsByTagName('h2')[0].textContent + ' - ' + document.getElementsByTagName('h3')[0].textContent;
+
+					if (videos[vidID] == null) {
+						videos[vidID] = {
+							title: vidTitle,
+							progress: 0,
+							max: -1,
+							done: false
+						}
+					}
+
+					vidFrame = document.getElementsByTagName('iframe')[0];
+
+					if (videos[vidID].progress > 0) {
+						updateSeekTime(vidFrame, videos[vidID].progress);
+					}
+
+					navButtons = document.getElementsByClassName('layout')[0];
+
+					createDoneButton(navButtons);
+				}, elLoadTimeout);
+			}
+		});
+
+		// Update the page after the DOM fully loads.
+		setTimeout(() => {
+			if (videos[vidID].progress > 0) {
+				updateSeekTime(vidFrame, videos[vidID].progress);
+			}
+
+			createDoneButton(navButtons);
+		}, elLoadTimeout);
+	} else {
+		function processVideoListItems(root = document) {
+			const list = root.getElementsByClassName('v-list-item');
+			for (let i = 0; i < list.length; i++) {
+				const item = list[i];
+				if (item.classList.contains('v-checked')) {
+					continue;
+				}
+
+				item.classList.add('v-checked');
+
+				const vidText = item.getElementsByClassName('v-list-item__title')[0];
+				if (!vidText) {
+					continue;
+				}
+
+				const span = GM_addElement('span', { textContent: vidText.textContent });
+				vidText.textContent = '';
+				vidText.appendChild(span);
+
+				const match = item.href && item.href.match(/\d+/);
+				if (!match) {
+					continue;
+				}
+				const vidID = match[0];
+
+				if (videos[vidID]) {
+					if (videos[vidID].done) {
+						span.classList.add('v-finished');
+						item.querySelector('.v-list-item__icon').textContent = '✓';
+					} else if (videos[vidID].progress > 0) {
+						span.style.background = 'linear-gradient(to right, green 0%, green ' + (videos[vidID].progress / videos[vidID].max) * 100 + '%, grey 0%, grey 100%)';
+						span.style.color = 'transparent';
+						span.style.backgroundClip = 'text';
+					}
 				}
 			}
 		}
-	});
 
-	// Update variables and elements as the webpage is navigated.
-	window.navigation.addEventListener('navigate', (e) => {
-		if (e.destination.url.startsWith('https://sovietscloset.com/video/')) {
-			trackProgress = true;
+		function observeVideoListUpdates() {
+			processVideoListItems();
 
-			setTimeout(() => {
-				// Update video details
-				vidID = window.location.pathname.match(/\d+/)[0];
-				vidTitle = document.getElementsByTagName('h2')[0].textContent + ' - ' + document.getElementsByTagName('h3')[0].textContent;
+			const root = document.querySelector('.v-expansion-panels') || document.body;
 
-				if (!videos[vidID]) {
-					videos[vidID] = {
-						title: vidTitle,
-						progress: 0,
-						max: -1,
-						done: false
-					};
-				}
+			const listObserver = new MutationObserver((mutations) => {
+				mutations.forEach((mutation) => {
+					mutation.addedNodes.forEach((node) => {
+						if (!(node instanceof Element)) {
+							return;
+						}
 
-				vidFrame = document.getElementsByTagName('iframe')[0];
+						if (node.matches('.v-expansion-panel') || node.matches('.v-expansion-panel-content')) {
+							processVideoListItems(node);
+						} else if (node.querySelector('.v-expansion-panel')) {
+							processVideoListItems(node);
+						} else if (node.querySelector('.v-expansion-panel-content')) {
+							processVideoListItems(node);
+						}
+					});
+				});
+			});
 
-				if (videos[vidID].progress > 0) {
-					updateSeekTime(vidFrame, videos[vidID].progress);
-				}
-
-				navButtons = document.getElementsByClassName('layout')[0];
-
-				createDoneButton(navButtons);
-			}, vidLoadTimeout);
-		}
-	});
-
-	// Update the page after the DOM fully loads.
-	setTimeout(() => {
-		if (videos[vidID].progress > 0) {
-			updateSeekTime(vidFrame, videos[vidID].progress);
+			listObserver.observe(root, {
+				childList: true,
+				subtree: true
+			});
 		}
 
-		createDoneButton(navButtons);
-	}, vidLoadTimeout);
+		setTimeout(() => {
+			observeVideoListUpdates();
+		}, elLoadTimeout);
+	}
 }
