@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.0.4
+// @version     3.0.5
 //
 // @match       https://www.furaffinity.net/view/*
 // @grant       GM_addStyle
@@ -49,7 +49,7 @@ if (submissionViewer.test(window.location)) {
 		const classes = buttonNav.querySelector('a').classList + '';
 
 		function createNavButton(link, label) {
-			const button = GM_addElement(label === 'Newer' ? undefined : buttonNav, 'a', {
+			const button = GM_addElement(buttonNav, 'a', {
 				class: classes,
 				href: link.href,
 				textContent: label
