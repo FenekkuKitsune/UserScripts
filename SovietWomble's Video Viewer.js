@@ -135,45 +135,45 @@ if (mediaDelivery.test(window.location)) {
 	});
 }
 if (sovietsCloset.test(window.location)) {
-		function processVideoListItems(root = document) {
-			const list = root.querySelectorAll('.v-list-item');
-			for (let i = 0; i < list.length; i++) {
-				const item = list[i];
-				const vidText = item.querySelector('.v-list-item__title');
-				const href = item.href && item.href.match(/\d+/);
+	function processVideoListItems(root = document) {
+		const list = root.querySelectorAll('.v-list-item');
+		for (let i = 0; i < list.length; i++) {
+			const item = list[i];
+			const vidText = item.querySelector('.v-list-item__title');
+			const href = item.href && item.href.match(/\d+/);
 
-				if (item.classList.contains('v-checked') || !vidText || !href) {
-					continue;
-				}
+			if (item.classList.contains('v-checked') || !vidText || !href) {
+				continue;
+			}
 
-				item.classList.add('v-checked');
+			item.classList.add('v-checked');
 
-				const vidID = href[0];
+			const vidID = href[0];
 
-				const span = GM_addElement('span', { textContent: vidText.textContent });
-				vidText.textContent = '';
-				vidText.appendChild(span);
+			const span = GM_addElement('span', { textContent: vidText.textContent });
+			vidText.textContent = '';
+			vidText.appendChild(span);
 
-				if (videos[vidID]) {
-					if (videos[vidID].done) {
-						span.classList.add('v-finished');
-						item.querySelector('.v-list-item__icon').textContent = '✓';
-					} else if (videos[vidID].progress > 0) {
-						span.style.background = 'linear-gradient(to right, green 0%, green ' + (videos[vidID].progress / videos[vidID].max) * 100 + '%, grey 0%, grey 100%)';
-						span.style.color = 'transparent';
-						span.style.backgroundClip = 'text';
-					}
+			if (videos[vidID]) {
+				if (videos[vidID].done) {
+					span.classList.add('v-finished');
+					item.querySelector('.v-list-item__icon').textContent = '✓';
+				} else if (videos[vidID].progress > 0) {
+					span.style.background = 'linear-gradient(to right, green 0%, green ' + (videos[vidID].progress / videos[vidID].max) * 100 + '%, grey 0%, grey 100%)';
+					span.style.color = 'transparent';
+					span.style.backgroundClip = 'text';
 				}
 			}
 		}
+	}
 
-		const styles = GM_addStyle(sovietsStyles);
-		const elLoadTimeout = 250;
+	const styles = GM_addStyle(sovietsStyles);
+	const elLoadTimeout = 250;
 
-		let videos = JSON.parse(localStorage.getItem('videoProgress'));
-		if (videos == null) {
-			videos = {};
-		}
+	let videos = JSON.parse(localStorage.getItem('videoProgress'));
+	if (videos == null) {
+		videos = {};
+	}
 
 	if (sovietsVideos.test(window.location)) {
 		function updateSeekTime(frame, time) {
