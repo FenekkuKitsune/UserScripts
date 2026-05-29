@@ -258,6 +258,7 @@ if (sovietsCloset.test(window.location)) {
 					navButtons = document.querySelector('.layout');
 
 					createDoneButton(navButtons);
+					processVideoListItems(document.querySelector('.v-list'));
 				}, elLoadTimeout);
 			}
 		});
