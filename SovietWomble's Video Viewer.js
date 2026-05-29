@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.1.3
+// @version     3.1.4
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -66,46 +66,36 @@ function vidControl(control) {
 	}
 }
 
+function addGlobalListeners(onMessage) {
+	window.addEventListener('keydown', handleKey);
+	window.addEventListener('message', onMessage);
+}
+
 function handleKey(e) {
-	let hotkeys = {
-		rewind: ['ArrowLeft'],
-		fastForward: ['ArrowRight'],
-		play: ['KeyK', 'Space']
+	const hotkeys = {
+		'rewind': ['ArrowLeft'],
+		'fast-forward': ['ArrowRight'],
+		'play': ['KeyK', 'Space']
+	};
+
+	let control = null;
+	for (const [key, keys] of Object.entries(hotkeys)) {
+		if (keys.includes(e.code)) {
+			control = key;
+			break;
+		}
 	}
+
+	if (!control) {
+		return;
+	}
+
+	e.preventDefault();
+
 	if (mediaDelivery.test(window.location)) {
-		if (hotkeys.rewind.includes(e.code)) {
-			vidControl('rewind');
-			e.preventDefault();
-		}
-		if (hotkeys.fastForward.includes(e.code)) {
-			vidControl('fast-forward');
-			e.preventDefault();
-		}
-		if (hotkeys.play.includes(e.code)) {
-			vidControl('play');
-			e.preventDefault();
-		}
-	}
-	if (sovietsCloset.test(window.location)) {
-		let vidFrame = document.querySelector('iframe').contentWindow
-		let sendControl = '';
-
-		if (hotkeys.rewind.includes(e.code)) {
-			sendControl = 'rewind';
-			e.preventDefault();
-		}
-		if (hotkeys.fastForward.includes(e.code)) {
-			sendControl = 'fast-forward';
-			e.preventDefault();
-		}
-		if (hotkeys.play.includes(e.code)) {
-			sendControl = 'play';
-			e.preventDefault();
-		}
-
-		if (sendControl) {
-			vidFrame.postMessage({ control: sendControl }, 'https://iframe.mediadelivery.net');
-		}
+		vidControl(control);
+	} else if (sovietsCloset.test(window.location)) {
+		document.querySelector('iframe').contentWindow.postMessage({ control }, 'https://iframe.mediadelivery.net');
 	}
 }
 
@@ -134,14 +124,9 @@ if (mediaDelivery.test(window.location)) {
 		});
 	})
 
-	// Listen for keypresses to control the video.
-	window.addEventListener('keydown', handleKey);
-
-	window.addEventListener('message', (e) => {
-		if (e.origin == 'https://sovietscloset.com') {
-			if (e.data.hasOwnProperty('control')) {
-				vidControl(e.data.control);
-			}
+	addGlobalListeners((e) => {
+		if (e.origin === 'https://sovietscloset.com' && e.data?.control) {
+			vidControl(e.data.control);
 		}
 	});
 }
@@ -191,6 +176,17 @@ if (sovietsCloset.test(window.location)) {
 			frame.setAttribute('src', frame.getAttribute('src') + '&t=' + time);
 		}
 
+		function ensureVideoRecord(vidID, vidTitle) {
+			if (!videos[vidID]) {
+				videos[vidID] = {
+					title: vidTitle,
+					progress: 0,
+					max: -1,
+					done: false
+				};
+			}
+		}
+
 		function createDoneButton(addTo) {
 			let button = GM_addElement('button', {
 				id: 'markDone',
@@ -226,30 +222,17 @@ if (sovietsCloset.test(window.location)) {
 		// Get the video navigation buttons
 		let navButtons = document.querySelector('.layout');
 		// Recall video progress, if any
-		if (!videos[vidID]) {
-			videos[vidID] = {
-				title: vidTitle,
-				progress: 0,
-				max: -1,
-				done: false
-			};
-		}
+		ensureVideoRecord(vidID, vidTitle);
 		let trackProgress = true;
 
-		// Listen for keypresses to control the video.
-		window.addEventListener('keydown', handleKey);
+		addGlobalListeners((e) => {
+			if (e.origin === 'https://iframe.mediadelivery.net' && e.data?.prog && trackProgress) {
+				const vidProgress = Math.floor(e.data.prog);
 
-		// Listen for video progress from iframe
-		window.addEventListener('message', (e) => {
-			if (e.origin == 'https://iframe.mediadelivery.net') {
-				if (e.data.hasOwnProperty('prog') && trackProgress) {
-					let vidProgress = Math.floor(e.data.prog);
-
-					if (vidProgress > videos[vidID].progress) {
-						videos[vidID].progress = Math.floor(e.data.prog);
-						videos[vidID].max = Math.floor(e.data.max);
-						localStorage.setItem('videoProgress', JSON.stringify(videos));
-					}
+				if (vidProgress > videos[vidID].progress) {
+					videos[vidID].progress = Math.floor(e.data.prog);
+					videos[vidID].max = Math.floor(e.data.max);
+					localStorage.setItem('videoProgress', JSON.stringify(videos));
 				}
 			}
 		});
@@ -264,14 +247,7 @@ if (sovietsCloset.test(window.location)) {
 					vidID = window.location.pathname.match(/\d+/)[0];
 					vidTitle = document.querySelector('h2').textContent + ' - ' + document.querySelector('h3').textContent;
 
-					if (videos[vidID] == null) {
-						videos[vidID] = {
-							title: vidTitle,
-							progress: 0,
-							max: -1,
-							done: false
-						}
-					}
+					ensureVideoRecord(vidID, vidTitle);
 
 					vidFrame = document.querySelector('iframe');
 

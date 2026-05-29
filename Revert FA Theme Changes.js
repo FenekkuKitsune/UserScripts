@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.0.3
+// @version     3.0.4
 //
 // @match       https://www.furaffinity.net/view/*
 // @grant       GM_addStyle
@@ -48,23 +48,28 @@ if (submissionViewer.test(window.location)) {
 		// Grab classes from the existing submission buttons, for visual consistency. Convert classlist to string.
 		const classes = buttonNav.querySelector('a').classList + '';
 
-		// Recreate the 'Newer' button if it exists
-		if (navNewer) {
-			const buttonNewer = GM_addElement('a', {
+		function createNavButton(link, label) {
+			const button = GM_addElement(label === 'Newer' ? undefined : buttonNav, 'a', {
 				class: classes,
-				href: navNewer.href,
-				textContent: 'Newer'
-			})
-			buttonNav.prepend(buttonNewer);
+				href: link.href,
+				textContent: label
+			});
+
+			if (label === 'Newer') {
+				buttonNav.prepend(button);
+			}
+
+			return button;
 		}
 
-		// Recreate the 'Older' button if it exists
-		if (navOlder) {
-			const buttonOlder = GM_addElement(buttonNav, 'a', {
-				class: classes,
-				href: navOlder.href,
-				textContent: 'Older'
-			})
+		// Recreate the 'Newer' and 'Older' buttons if they exist.
+		if (navNewer) {
+			createNavButton(navNewer, 'Newer');
 		}
+
+		if (navOlder) {
+			createNavButton(navOlder, 'Older');
+		}
+
 	}
 }
