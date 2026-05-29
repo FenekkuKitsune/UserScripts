@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.0.5
+// @version     3.0.6
 //
 // @match       https://www.furaffinity.net/view/*
 // @grant       GM_addStyle
@@ -27,17 +27,13 @@ if (submissionViewer.test(window.location)) {
 	// Nav buttons, only run if the mini gallery exists
 	if (galleryNav) {
 		const navButtons = galleryNav.querySelectorAll('a');
-		let navNewer;
-		let navOlder;
 
-		// Find the 'new' buttons. There's better ways to do this, but eh, who cares.
-		for (let i = 0; i < navButtons.length; i++) {
-			if (navButtons[i].textContent === 'Older »') {
-				navOlder = navButtons[i];
-			} else if (navButtons[i].textContent === '« Newer') {
-				navNewer = navButtons[i];
-			}
+		// Find the 'new' buttons.
+		let navNewer;
+		if (navButtons.length > 1) {
+			navNewer = navButtons[0];
 		}
+		let navOlder = navOlder = navButtons[navButtons.length - 1];
 
 		// Hide the new navigation buttons
 		galleryNav.style.display = 'none';
@@ -48,6 +44,13 @@ if (submissionViewer.test(window.location)) {
 		// Grab classes from the existing submission buttons, for visual consistency. Convert classlist to string.
 		const classes = buttonNav.querySelector('a').classList + '';
 
+		/**
+		 * Creates a replacement navigation button using the existing submission-button styles.
+		 *
+		 * @param {HTMLAnchorElement} link - The original navigation link to copy the href from.
+		 * @param {'Newer' | 'Older'} label - The label to display on the generated button.
+		 * @returns {HTMLAnchorElement} The newly created navigation button.
+		 */
 		function createNavButton(link, label) {
 			const button = GM_addElement(buttonNav, 'a', {
 				class: classes,
@@ -70,6 +73,5 @@ if (submissionViewer.test(window.location)) {
 		if (navOlder) {
 			createNavButton(navOlder, 'Older');
 		}
-
 	}
 }
