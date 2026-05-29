@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.1.4
+// @version     3.1.5
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
