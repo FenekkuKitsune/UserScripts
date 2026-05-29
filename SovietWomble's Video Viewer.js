@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.2.1
+// @version     3.3.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -272,9 +272,7 @@ if (sovietsCloset.test(window.location)) {
 			addTo.prepend(buttonUnwatched);
 
 			buttonWatched.onclick = function() {
-				// Stop tracking progress for the video, mark it as done, and save to localStorage.
-				trackProgress = false;
-
+				// Mark the video as done and save it to localStorage.
 				const vidID = window.location.pathname.match(/\d+/)[0];
 				videos[vidID].done = true;
 				localStorage.setItem('videoProgress', JSON.stringify(videos));
@@ -285,20 +283,15 @@ if (sovietsCloset.test(window.location)) {
 			}
 
 			buttonUnwatched.onclick = function() {
-				// Stop tracking progress for the video, mark it as not done with 0 progress, and save to localStorage.
-				trackProgress = false;
-
-				const vidID = window.location.pathname.match(/\d+/)[0];
-				videos[vidID].done = false;
-				videos[vidID].progress = 0;
-				localStorage.setItem('videoProgress', JSON.stringify(videos));
-
 				// Reset the video by removing the seek time parameter from the iframe src.
 				const vidFrame = document.querySelector('iframe');
 				vidFrame.setAttribute('src', vidFrame.getAttribute('src').split('&t=')[0]);
 
-				// Start tracking progress again.
-				trackProgress = true;
+				// Mark the video as not done with 0 progress, and save it to localStorage.
+				const vidID = window.location.pathname.match(/\d+/)[0];
+				videos[vidID].done = false;
+				videos[vidID].progress = 0;
+				localStorage.setItem('videoProgress', JSON.stringify(videos));
 
 				// Apply the 'green' background color to the "Mark Unwatched" button, and remove it from the "Mark Watched" button.
 				this.style.backgroundColor = 'green';
@@ -315,14 +308,9 @@ if (sovietsCloset.test(window.location)) {
 		let navButtons = document.querySelector('.layout');
 		// Ensure a record exists for the video in the videos object.
 		ensureVideoRecord(vidID, vidTitle);
-		// Start tracking progress, unless the video is already marked as done.
-		let trackProgress = true;
-		if (videos[vidID].done === true) {
-			trackProgress = false;
-		}
 
 		addGlobalListeners((e) => {
-			if (e.origin === 'https://iframe.mediadelivery.net' && e.data?.prog && trackProgress) {
+			if (e.origin === 'https://iframe.mediadelivery.net' && e.data?.prog) {
 				// If we're tracking progress for this video, update the video's progress as it plays.
 				const vidProgress = Math.floor(e.data.prog);
 
@@ -344,12 +332,6 @@ if (sovietsCloset.test(window.location)) {
 
 					// Ensure a record exists for the new video in the videos object.
 					ensureVideoRecord(vidID, vidTitle);
-
-					// Start tracking progress for the new video, unless it's already marked as done.
-					trackProgress = true;
-					if (videos[vidID].done === true) {
-						trackProgress = false;
-					}
 
 					// Update the video frame variable to the new video's iframe.
 					vidFrame = document.querySelector('iframe');
