@@ -267,16 +267,16 @@ if (sovietsCloset.test(window.location)) {
 			const list = root.querySelectorAll('.v-list-item');
 			for (let i = 0; i < list.length; i++) {
 				const item = list[i];
-				if (item.classList.contains('v-checked')) {
+				const vidText = item.querySelector('.v-list-item__title');
+				const href = item.href && item.href.match(/\d+/);
+
+				if (item.classList.contains('v-checked') || !vidText || !href) {
 					continue;
 				}
 
 				item.classList.add('v-checked');
 
-				const vidText = item.querySelector('.v-list-item__title');
-				if (!vidText) {
-					continue;
-				}
+				const vidID = href[0];
 
 				const span = GM_addElement('span', { textContent: vidText.textContent });
 				vidText.textContent = '';
@@ -313,11 +313,10 @@ if (sovietsCloset.test(window.location)) {
 							return;
 						}
 
-						if (node.matches('.v-expansion-panel') || node.matches('.v-expansion-panel-content')) {
-							processVideoListItems(node);
-						} else if (node.querySelector('.v-expansion-panel')) {
-							processVideoListItems(node);
-						} else if (node.querySelector('.v-expansion-panel-content')) {
+						if (
+							node.matches('.v-expansion-panel, .v-expansion-panel-content') ||
+							node.querySelector('.v-expansion-panel, .v-expansion-panel-content')
+						) {
 							processVideoListItems(node);
 						}
 					});
