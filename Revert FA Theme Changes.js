@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.0.2
+// @version     3.0.3
 //
 // @match       https://www.furaffinity.net/view/*
 // @grant       GM_addStyle
@@ -22,11 +22,11 @@ a:hover {
 
 if (submissionViewer.test(window.location)) {
 	// Get the mini gallery navigation
-	const galleryNav = document.getElementsByClassName('minigallery-navigation')[0];
+	const galleryNav = document.querySelector('.minigallery-navigation');
 
 	// Nav buttons, only run if the mini gallery exists
 	if (galleryNav) {
-		const navButtons = galleryNav.getElementsByTagName('a');
+		const navButtons = galleryNav.querySelectorAll('a');
 		let navNewer;
 		let navOlder;
 
@@ -43,10 +43,10 @@ if (submissionViewer.test(window.location)) {
 		galleryNav.style.display = 'none';
 
 		// Grab the submission buttons div
-		const buttonNav = document.getElementById('submission-options');
+		const buttonNav = document.querySelector('#submission-options');
 
 		// Grab classes from the existing submission buttons, for visual consistency. Convert classlist to string.
-		const classes = buttonNav.getElementsByTagName('a')[0].classList + '';
+		const classes = buttonNav.querySelector('a').classList + '';
 
 		// Recreate the 'Newer' button if it exists
 		if (navNewer) {

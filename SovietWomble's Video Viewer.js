@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.1.2
+// @version     3.1.3
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -87,7 +87,7 @@ function handleKey(e) {
 		}
 	}
 	if (sovietsCloset.test(window.location)) {
-		let vidFrame = document.getElementsByTagName('iframe')[0].contentWindow
+		let vidFrame = document.querySelector('iframe').contentWindow
 		let sendControl = '';
 
 		if (hotkeys.rewind.includes(e.code)) {
@@ -188,11 +188,11 @@ if (sovietsCloset.test(window.location)) {
 
 		// Get video details
 		let vidID = window.location.pathname.match(/\d+/)[0];
-		let vidTitle = document.getElementsByTagName('h2')[0].textContent + ' - ' + document.getElementsByTagName('h3')[0].textContent;
+		let vidTitle = document.querySelector('h2').textContent + ' - ' + document.querySelector('h3').textContent;
 		// Get the iframe that the video runs in.
-		let vidFrame = document.getElementsByTagName('iframe')[0];
+		let vidFrame = document.querySelector('iframe');
 		// Get the video navigation buttons
-		let navButtons = document.getElementsByClassName('layout')[0];
+		let navButtons = document.querySelector('.layout');
 		// Recall video progress, if any
 		if (!videos[vidID]) {
 			videos[vidID] = {
@@ -230,7 +230,7 @@ if (sovietsCloset.test(window.location)) {
 				setTimeout(() => {
 					// Update video details
 					vidID = window.location.pathname.match(/\d+/)[0];
-					vidTitle = document.getElementsByTagName('h2')[0].textContent + ' - ' + document.getElementsByTagName('h3')[0].textContent;
+					vidTitle = document.querySelector('h2').textContent + ' - ' + document.querySelector('h3').textContent;
 
 					if (videos[vidID] == null) {
 						videos[vidID] = {
@@ -241,13 +241,13 @@ if (sovietsCloset.test(window.location)) {
 						}
 					}
 
-					vidFrame = document.getElementsByTagName('iframe')[0];
+					vidFrame = document.querySelector('iframe');
 
 					if (videos[vidID].progress > 0) {
 						updateSeekTime(vidFrame, videos[vidID].progress);
 					}
 
-					navButtons = document.getElementsByClassName('layout')[0];
+					navButtons = document.querySelector('.layout');
 
 					createDoneButton(navButtons);
 				}, elLoadTimeout);
@@ -264,7 +264,7 @@ if (sovietsCloset.test(window.location)) {
 		}, elLoadTimeout);
 	} else {
 		function processVideoListItems(root = document) {
-			const list = root.getElementsByClassName('v-list-item');
+			const list = root.querySelectorAll('.v-list-item');
 			for (let i = 0; i < list.length; i++) {
 				const item = list[i];
 				if (item.classList.contains('v-checked')) {
@@ -273,7 +273,7 @@ if (sovietsCloset.test(window.location)) {
 
 				item.classList.add('v-checked');
 
-				const vidText = item.getElementsByClassName('v-list-item__title')[0];
+				const vidText = item.querySelector('.v-list-item__title');
 				if (!vidText) {
 					continue;
 				}
