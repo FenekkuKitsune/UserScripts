@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.1.5
+// @version     3.1.6
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -203,14 +203,11 @@ if (sovietsCloset.test(window.location)) {
 			button.onclick = function() {
 				trackProgress = false;
 
-				setCookie(cookieName, '-1', '-1');
+				const videos = JSON.parse(localStorage.getItem('videoProgress'));
+				videos[window.location.pathname.match(/\d+/)[0]].done = true;
+				localStorage.setItem('videoProgress', JSON.stringify(videos));
 
-				if (getCookie(cookieName) === '') {
-					this.style.backgroundColor = 'green';
-				} else {
-					this.style.backgroundColor = 'red';
-					console.error('Failed to delete cookie ' + cookieName);
-				}
+				this.style.backgroundColor = 'green';
 			}
 		}
 
