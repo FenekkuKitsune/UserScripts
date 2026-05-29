@@ -220,8 +220,8 @@ if (sovietsCloset.test(window.location)) {
 			buttonWatched.onclick = function() {
 				trackProgress = false;
 
-				const videos = JSON.parse(localStorage.getItem('videoProgress'));
-				videos[window.location.pathname.match(/\d+/)[0]].done = true;
+				const vidID = window.location.pathname.match(/\d+/)[0];
+				videos[vidID].done = true;
 				localStorage.setItem('videoProgress', JSON.stringify(videos));
 
 				this.style.backgroundColor = 'green';
@@ -231,9 +231,9 @@ if (sovietsCloset.test(window.location)) {
 			buttonUnwatched.onclick = function() {
 				trackProgress = false;
 
-				const videos = JSON.parse(localStorage.getItem('videoProgress'));
-				videos[window.location.pathname.match(/\d+/)[0]].done = false;
-				videos[window.location.pathname.match(/\d+/)[0]].progress = 0;
+				const vidID = window.location.pathname.match(/\d+/)[0];
+				videos[vidID].done = false;
+				videos[vidID].progress = 0;
 				localStorage.setItem('videoProgress', JSON.stringify(videos));
 
 				const vidFrame = document.querySelector('iframe');
