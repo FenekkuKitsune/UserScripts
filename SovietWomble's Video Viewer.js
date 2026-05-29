@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.1.1
+// @version     3.1.2
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -146,13 +146,13 @@ if (mediaDelivery.test(window.location)) {
 	});
 }
 if (sovietsCloset.test(window.location)) {
-	var styles = GM_addStyle(sovietsStyles);
-	var elLoadTimeout = 250;
+		const styles = GM_addStyle(sovietsStyles);
+		const elLoadTimeout = 250;
 
-	var videos = JSON.parse(localStorage.getItem('videoProgress'));
-	if (videos == null) {
-		videos = {};
-	}
+		let videos = JSON.parse(localStorage.getItem('videoProgress'));
+		if (videos == null) {
+			videos = {};
+		}
 
 	if (sovietsVideos.test(window.location)) {
 		function updateSeekTime(frame, time) {
@@ -187,12 +187,12 @@ if (sovietsCloset.test(window.location)) {
 		}
 
 		// Get video details
-		var vidID = window.location.pathname.match(/\d+/)[0];
-		var vidTitle = document.getElementsByTagName('h2')[0].textContent + ' - ' + document.getElementsByTagName('h3')[0].textContent;
+		let vidID = window.location.pathname.match(/\d+/)[0];
+		let vidTitle = document.getElementsByTagName('h2')[0].textContent + ' - ' + document.getElementsByTagName('h3')[0].textContent;
 		// Get the iframe that the video runs in.
-		var vidFrame = document.getElementsByTagName('iframe')[0];
+		let vidFrame = document.getElementsByTagName('iframe')[0];
 		// Get the video navigation buttons
-		var navButtons = document.getElementsByClassName('layout')[0];
+		let navButtons = document.getElementsByClassName('layout')[0];
 		// Recall video progress, if any
 		if (!videos[vidID]) {
 			videos[vidID] = {
@@ -202,7 +202,7 @@ if (sovietsCloset.test(window.location)) {
 				done: false
 			};
 		}
-		var trackProgress = true;
+		let trackProgress = true;
 
 		// Listen for keypresses to control the video.
 		window.addEventListener('keydown', handleKey);
