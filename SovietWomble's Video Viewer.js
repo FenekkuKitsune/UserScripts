@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.1.6
+// @version     3.2.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -16,8 +16,12 @@ const mediaDelivery = new URLPattern({ hostname: 'iframe.mediadelivery.net', pat
 const sovietsCloset = new URLPattern({ hostname: 'sovietscloset.com'});
 const sovietsVideos = new URLPattern({ pathname: '/video/*'});
 const sovietsStyles = `
-#markDone {
+#markWatched {
 	position: absolute; top: 0.35em; right: 0.5em;
+}
+
+#markUnwatched {
+	position: absolute; top: 0.35em; right: 12.1em;
 }
 
 .container {
@@ -187,20 +191,33 @@ if (sovietsCloset.test(window.location)) {
 			}
 		}
 
-		function createDoneButton(addTo) {
-			let button = GM_addElement('button', {
-				id: 'markDone',
-				class: 'v-btn v-btn--outlined theme--dark v-size--default',
+		function createDoneButtons(addTo) {
+			const buttonClasses = 'v-btn v-btn--outlined theme--dark v-size--default';
+
+			const buttonWatched = GM_addElement('button', {
+				id: 'markWatched',
+				class: buttonClasses,
 				type: 'button'
-			})
-			let span = GM_addElement(button, 'span', {
+			});
+			const spanWatched = GM_addElement(buttonWatched, 'span', {
 				class: 'v-btn__content',
-				textContent: 'Mark Completed'
-			})
+				textContent: 'Mark Watched'
+			});
 
-			addTo.prepend(button);
+			const buttonUnwatched = GM_addElement('button', {
+				id: 'markUnwatched',
+				class: buttonClasses,
+				type: 'button'
+			});
+			const spanUnwatched = GM_addElement(buttonUnwatched, 'span', {
+				class: 'v-btn__content',
+				textContent: 'Mark Unwatched'
+			});
 
-			button.onclick = function() {
+			addTo.prepend(buttonWatched);
+			addTo.prepend(buttonUnwatched);
+
+			buttonWatched.onclick = function() {
 				trackProgress = false;
 
 				const videos = JSON.parse(localStorage.getItem('videoProgress'));
@@ -208,6 +225,24 @@ if (sovietsCloset.test(window.location)) {
 				localStorage.setItem('videoProgress', JSON.stringify(videos));
 
 				this.style.backgroundColor = 'green';
+				buttonUnwatched.style.backgroundColor = '';
+			}
+
+			buttonUnwatched.onclick = function() {
+				trackProgress = false;
+
+				const videos = JSON.parse(localStorage.getItem('videoProgress'));
+				videos[window.location.pathname.match(/\d+/)[0]].done = false;
+				videos[window.location.pathname.match(/\d+/)[0]].progress = 0;
+				localStorage.setItem('videoProgress', JSON.stringify(videos));
+
+				const vidFrame = document.querySelector('iframe');
+				vidFrame.setAttribute('src', vidFrame.getAttribute('src').split('&t=')[0]);
+
+				trackProgress = true;
+
+				this.style.backgroundColor = 'green';
+				buttonWatched.style.backgroundColor = '';
 			}
 		}
 
@@ -221,6 +256,9 @@ if (sovietsCloset.test(window.location)) {
 		// Recall video progress, if any
 		ensureVideoRecord(vidID, vidTitle);
 		let trackProgress = true;
+		if (videos[vidID].done === true) {
+			trackProgress = false;
+		}
 
 		addGlobalListeners((e) => {
 			if (e.origin === 'https://iframe.mediadelivery.net' && e.data?.prog && trackProgress) {
@@ -254,7 +292,7 @@ if (sovietsCloset.test(window.location)) {
 
 					navButtons = document.querySelector('.layout');
 
-					createDoneButton(navButtons);
+					createDoneButtons(navButtons);
 					processVideoListItems(document.querySelector('.v-list'));
 				}, elLoadTimeout);
 			}
@@ -266,7 +304,7 @@ if (sovietsCloset.test(window.location)) {
 				updateSeekTime(vidFrame, videos[vidID].progress);
 			}
 
-			createDoneButton(navButtons);
+			createDoneButtons(navButtons);
 			processVideoListItems(document.querySelector('.v-list'));
 		}, elLoadTimeout);
 	} else {
