@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.3.0
+// @version     4.0.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -30,6 +30,11 @@ const sovietsStyles = `
 
 .flex > div:has(iframe) {
 	padding-top: 85vh !important;
+}
+
+.v-progress {
+	color: transparent;
+	background-clip: text;
 }
 
 .v-finished {
@@ -171,12 +176,9 @@ if (sovietsCloset.test(window.location)) {
 			const href = item.href && item.href.match(/\d+/);
 
 			// Skip if the item has already been processed, or if it doesn't have a valid video ID or title element.
-			if (item.classList.contains('v-checked') || !vidText || !href) {
+			if (item.classList.contains('v-finished') || !vidText || !href) {
 				continue;
 			}
-
-			// Mark the item as processed.
-			item.classList.add('v-checked');
 
 			const vidID = href[0];
 
@@ -188,13 +190,13 @@ if (sovietsCloset.test(window.location)) {
 			if (videos[vidID]) {
 				if (videos[vidID].done) {
 					// If the video was marked as done, apply the 'finished' styles and add a checkmark.
+					span.classList.remove('v-progress');
 					span.classList.add('v-finished');
 					item.querySelector('.v-list-item__icon').textContent = '✓';
 				} else if (videos[vidID].progress > 0) {
 					// If the video is not marked as done, but has progress, apply a gradient to the text based on watch percentage.
-					span.style.background = 'linear-gradient(to right, green 0%, green ' + (videos[vidID].progress / videos[vidID].max) * 100 + '%, grey 0%, grey 100%)';
-					span.style.color = 'transparent';
-					span.style.backgroundClip = 'text';
+					span.style.backgroundImage = 'linear-gradient(to right, green 0%, green ' + (videos[vidID].progress / videos[vidID].max) * 100 + '%, grey 0%, grey 100%)';
+					span.classList.add('v-progress');
 				}
 			}
 		}
@@ -244,7 +246,7 @@ if (sovietsCloset.test(window.location)) {
 		 * 
 		 * @param {HTMLElement} addTo - The element to which the buttons will be added.
 		 */
-		function createDoneButtons(addTo) {
+		function updateVideoDOM(addTo) {
 			// Button styles, copied from existing buttons on the page for visual consistency.
 			const buttonClasses = 'v-btn v-btn--outlined theme--dark v-size--default';
 
@@ -297,6 +299,17 @@ if (sovietsCloset.test(window.location)) {
 				this.style.backgroundColor = 'green';
 				buttonWatched.style.backgroundColor = '';
 			}
+
+			// Update the video list when the drawer is opened
+			const vListBtn = document.querySelector('.mr-3.mt-3 > button');
+
+			vListBtn.addEventListener('click', () => {
+				const vDrawer = document.querySelector('.v-navigation-drawer');
+
+				if (vDrawer.classList.contains('v-navigation-drawer--open')) {
+					processVideoListItems(document.querySelector('.v-list'));
+				}
+			});
 		}
 
 		// Get video details
@@ -345,7 +358,7 @@ if (sovietsCloset.test(window.location)) {
 					// As well as update the video list.
 					navButtons = document.querySelector('.layout');
 
-					createDoneButtons(navButtons);
+					updateVideoDOM(navButtons);
 					processVideoListItems(document.querySelector('.v-list'));
 				}, elLoadTimeout);
 			}
@@ -358,7 +371,7 @@ if (sovietsCloset.test(window.location)) {
 			}
 
 			// Create the watched/unwatched buttons and apply progress styles to the video list.
-			createDoneButtons(navButtons);
+			updateVideoDOM(navButtons);
 			processVideoListItems(document.querySelector('.v-list'));
 		}, elLoadTimeout);
 	} else {
