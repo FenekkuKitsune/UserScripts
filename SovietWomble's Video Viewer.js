@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     4.0.0
+// @version     4.0.1
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -209,9 +209,7 @@ if (sovietsCloset.test(window.location)) {
 
 	// Load video progress from localStorage, or initialize it if it doesn't exist.
 	let videos = JSON.parse(localStorage.getItem('videoProgress'));
-	if (videos == null) {
-		videos = {};
-	}
+	videos ??= {};
 
 	if (sovietsVideos.test(window.location)) {
 		/**
@@ -231,13 +229,11 @@ if (sovietsCloset.test(window.location)) {
 		 * @param {string} vidTitle - The video title, derived from the page's h2 and h3 elements.
 		 */
 		function ensureVideoRecord(vidID, vidTitle) {
-			if (!videos[vidID]) {
-				videos[vidID] = {
-					title: vidTitle,
-					progress: 0,
-					max: -1,
-					done: false
-				};
+			videos[vidID] ??= {
+				title: vidTitle,
+				progress: 0,
+				max: -1,
+				done: false
 			}
 		}
 
