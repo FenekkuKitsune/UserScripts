@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     4.1.0
+// @version     4.1.1
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -197,7 +197,7 @@ if (sovietsCloset.test(window.location)) {
 					item.querySelector('.v-list-item__icon').textContent = '✓';
 				} else if (videos[vidID].progress > 0) {
 					// If the video is not marked as done, but has progress, apply a gradient to the text based on watch percentage.
-					span.style.backgroundImage = 'linear-gradient(to right, green 0%, green ' + (videos[vidID].progress / videos[vidID].max) * 100 + '%, grey 0%, grey 100%)';
+					span.style.backgroundImage = `line-gradient(to right, green 0%, green ${(videos[vidID].progress / videos[vidID].max) * 100}%, grey 0%, grey 100%)`;
 					span.classList.add('v-progress');
 				}
 			}
@@ -344,7 +344,7 @@ if (sovietsCloset.test(window.location)) {
 
 		// Get video details
 		let vidID = window.location.pathname.match(/\d+/)[0];
-		let vidTitle = document.querySelector('h2').textContent + ' - ' + document.querySelector('h3').textContent;
+		let vidTitle = `${document.querySelector('h2').textContent} - ${document.querySelector('h3').textContent}`;
 		// Get the iframe that the video runs in.
 		let vidFrame = document.querySelector('iframe');
 		// Get the video navigation buttons
@@ -371,7 +371,7 @@ if (sovietsCloset.test(window.location)) {
 				setTimeout(() => {
 					// Update video details
 					vidID = window.location.pathname.match(/\d+/)[0];
-					vidTitle = document.querySelector('h2').textContent + ' - ' + document.querySelector('h3').textContent;
+					vidTitle = `${document.querySelector('h2').textContent} - ${document.querySelector('h3').textContent}`;
 
 					// Ensure a record exists for the new video in the videos object.
 					ensureVideoRecord(vidID, vidTitle);
