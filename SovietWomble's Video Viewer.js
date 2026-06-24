@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     4.1.2
+// @version     5.0.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -133,36 +133,35 @@ function handleKey(e) {
 }
 
 if (mediaDelivery.test(window.location)) {
-	const sendInterval = 5000;
+	const sendInterval = 1500;
 	let lastSend = Date.now();
 
-	// Wait for the seek bar to load, then observe it for changes to the current time.
-	waitForElm('input[data-plyr*="seek"').then((elm) => {
-		const vidObserver = new MutationObserver(function (mutations) {
-			mutations.forEach(function (mutation) {
-				if (mutation.type === 'attributes') {
-					if (mutation.attributeName === 'aria-valuenow') {
-						if (Date.now() - sendInterval >= lastSend) {
-							// Communicate the current time to the parent window.
-							window.parent.postMessage(
-								{
-									prog: mutation.target.getAttribute('aria-valuenow'),
-									max: mutation.target.getAttribute('aria-valuemax')
-								},
-								'https://sovietscloset.com'
-							);
+	function sendProgress(elm) {
+		window.parent.postMessage(
+			{
+				prog: elm.currentTime,
+				max: elm.duration
+			},
+			'https://sovietscloset.com'
+		);
+	}
 
-							lastSend = Date.now();
-						}
-					}
-				}
-			});
+	// Wait for the video to load
+	waitForElm('video').then((elm) => {
+		// Track the video for progress updates
+		elm.addEventListener('timeupdate', () => {
+			const now = Date.now();
+
+			if (now - lastSend >= sendInterval) {
+				sendProgress(elm);
+
+				lastSend = now;
+			}
 		});
 
-		vidObserver.observe(elm, {
-			attributes: true,
-		});
-	})
+		// Also track for when the video is paused
+		elm.addEventListener('pause', () => { sendProgress(elm) });
+	});
 
 	addGlobalListeners((e) => {
 		if (e.origin === 'https://sovietscloset.com' && e.data?.control) {
