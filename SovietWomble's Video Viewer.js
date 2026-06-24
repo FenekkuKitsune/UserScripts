@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     4.1.1
+// @version     4.1.2
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -213,7 +213,7 @@ if (sovietsCloset.test(window.location)) {
 	let videos = JSON.parse(localStorage.getItem('videoProgress'));
 	videos ??= {};
 	let autoplayState = localStorage.getItem('autoplay');
-	autoplayState ??= true;
+	autoplayState = autoplayState === null ? true : autoplayState === 'true';
 
 	if (sovietsVideos.test(window.location)) {
 		/**
