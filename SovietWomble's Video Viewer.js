@@ -212,16 +212,29 @@ if (sovietsCloset.test(window.location)) {
 	// Load video progress from localStorage, or initialize it if it doesn't exist.
 	let videos = JSON.parse(localStorage.getItem('videoProgress'));
 	videos ??= {};
+	let autoplayState = localStorage.getItem('autoplay');
+	autoplayState ??= true;
 
 	if (sovietsVideos.test(window.location)) {
 		/**
 		 * Updates the seek time of the video frame.
 		 * 
 		 * @param {HTMLIFrameElement} frame - The video frame to update.
+		 * @param {boolean} autoplay - Whether or not Autoplay is enabled.
 		 * @param {number} time - The new seek time.
 		 */
-		function updateSeekTime(frame, time) {
-			frame.setAttribute('src', frame.getAttribute('src') + '&t=' + time);
+		function updateSeekTime(frame, autoplay, time) {
+			// Get frame src attribute
+			const src = frame.getAttribute('src');
+
+			// Remove the src arguments
+			const srcWithoutArgs = src.split('?')[0];
+
+			// Add our own arguments to the src.
+			const srcWithArgs = srcWithoutArgs + `?autoplay=${autoplay}&t=${time}`;
+
+			// Replace the src on the frame
+			frame.setAttribute('src', srcWithArgs);
 		}
 
 		/**
@@ -252,6 +265,16 @@ if (sovietsCloset.test(window.location)) {
 				id: 'watchProgressButtons'
 			});
 
+			const buttonAutoplay = GM_addElement(buttonContainer, 'button', {
+				id: 'toggleAutoplay',
+				class: buttonClasses,
+				type: 'button'
+			})
+			const spanAutoplay = GM_addElement(buttonAutoplay, 'span', {
+				class: 'v-btn__content',
+				textContent: `Autoplay: ${autoplayState ? 'On' : 'Off'}`
+			});
+
 			const buttonWatched = GM_addElement(buttonContainer, 'button', {
 				id: 'markWatched',
 				class: buttonClasses,
@@ -271,6 +294,14 @@ if (sovietsCloset.test(window.location)) {
 				class: 'v-btn__content',
 				textContent: 'Mark Unwatched'
 			});
+
+			buttonAutoplay.onclick = function() {
+				autoplayState = !autoplayState;
+
+				localStorage.setItem('autoplay', autoplayState);
+
+				this.querySelector('span').textContent = `Autoplay: ${autoplayState ? 'On' : 'Off'}`;
+			}
 
 			buttonWatched.onclick = function() {
 				// Mark the video as done and save it to localStorage.
@@ -350,7 +381,7 @@ if (sovietsCloset.test(window.location)) {
 
 					// Update the seek time of the new video if it has progress, so that navigation between videos retains progress.
 					if (videos[vidID].progress > 0) {
-						updateSeekTime(vidFrame, videos[vidID].progress);
+						updateSeekTime(vidFrame, autoplayState, videos[vidID].progress);
 					}
 
 					// Create new watched/unwatched buttons for the new video
@@ -365,7 +396,7 @@ if (sovietsCloset.test(window.location)) {
 		setTimeout(() => {
 			// Update the seek time of the video if it has progress.
 			if (videos[vidID].progress > 0) {
-				updateSeekTime(vidFrame, videos[vidID].progress);
+				updateSeekTime(vidFrame, autoplayState, videos[vidID].progress);
 			}
 
 			// Create the watched/unwatched buttons and apply progress styles to the video list.
