@@ -133,20 +133,27 @@ function handleKey(e) {
 }
 
 if (mediaDelivery.test(window.location)) {
+	const sendInterval = 5000;
+	let lastSend = Date.now();
+
 	// Wait for the seek bar to load, then observe it for changes to the current time.
 	waitForElm('input[data-plyr*="seek"').then((elm) => {
 		const vidObserver = new MutationObserver(function (mutations) {
 			mutations.forEach(function (mutation) {
 				if (mutation.type === 'attributes') {
 					if (mutation.attributeName === 'aria-valuenow') {
-						// Communicate the current time to the parent window.
-						window.parent.postMessage(
-							{
-								prog: mutation.target.getAttribute('aria-valuenow'),
-								max: mutation.target.getAttribute('aria-valuemax')
-							},
-							'https://sovietscloset.com'
-						);
+						if (Date.now() - sendInterval >= lastSend) {
+							// Communicate the current time to the parent window.
+							window.parent.postMessage(
+								{
+									prog: mutation.target.getAttribute('aria-valuenow'),
+									max: mutation.target.getAttribute('aria-valuemax')
+								},
+								'https://sovietscloset.com'
+							);
+
+							lastSend = Date.now();
+						}
 					}
 				}
 			});
