@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     4.0.1
+// @version     4.1.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -16,12 +16,14 @@ const mediaDelivery = new URLPattern({ hostname: 'iframe.mediadelivery.net', pat
 const sovietsCloset = new URLPattern({ hostname: 'sovietscloset.com'});
 const sovietsVideos = new URLPattern({ pathname: '/video/*'});
 const sovietsStyles = `
-#markWatched {
-	position: absolute; top: 0.35em; right: 0.5em;
+#watchProgressButtons {
+	position: absolute;
+	top: 0.35em;
+	right: 0.35em;
 }
 
-#markUnwatched {
-	position: absolute; top: 0.35em; right: 12.1em;
+#watchProgressButtons > button {
+	margin-left: 0.35em;
 }
 
 .container {
@@ -242,11 +244,15 @@ if (sovietsCloset.test(window.location)) {
 		 * 
 		 * @param {HTMLElement} addTo - The element to which the buttons will be added.
 		 */
-		function updateVideoDOM(addTo) {
+		function updateVideoDOM() {
 			// Button styles, copied from existing buttons on the page for visual consistency.
 			const buttonClasses = 'v-btn v-btn--outlined theme--dark v-size--default';
 
-			const buttonWatched = GM_addElement('button', {
+			const buttonContainer = GM_addElement(document.querySelector('.v-main__wrap'), 'div', {
+				id: 'watchProgressButtons'
+			});
+
+			const buttonWatched = GM_addElement(buttonContainer, 'button', {
 				id: 'markWatched',
 				class: buttonClasses,
 				type: 'button'
@@ -256,7 +262,7 @@ if (sovietsCloset.test(window.location)) {
 				textContent: 'Mark Watched'
 			});
 
-			const buttonUnwatched = GM_addElement('button', {
+			const buttonUnwatched = GM_addElement(buttonContainer, 'button', {
 				id: 'markUnwatched',
 				class: buttonClasses,
 				type: 'button'
@@ -265,9 +271,6 @@ if (sovietsCloset.test(window.location)) {
 				class: 'v-btn__content',
 				textContent: 'Mark Unwatched'
 			});
-
-			addTo.prepend(buttonWatched);
-			addTo.prepend(buttonUnwatched);
 
 			buttonWatched.onclick = function() {
 				// Mark the video as done and save it to localStorage.
@@ -352,9 +355,8 @@ if (sovietsCloset.test(window.location)) {
 
 					// Create new watched/unwatched buttons for the new video
 					// As well as update the video list.
-					navButtons = document.querySelector('.layout');
 
-					updateVideoDOM(navButtons);
+					updateVideoDOM();
 					processVideoListItems(document.querySelector('.v-list'));
 				}, elLoadTimeout);
 			}
@@ -367,7 +369,7 @@ if (sovietsCloset.test(window.location)) {
 			}
 
 			// Create the watched/unwatched buttons and apply progress styles to the video list.
-			updateVideoDOM(navButtons);
+			updateVideoDOM();
 			processVideoListItems(document.querySelector('.v-list'));
 		}, elLoadTimeout);
 	} else {
