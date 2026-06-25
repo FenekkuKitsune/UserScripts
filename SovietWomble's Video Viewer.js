@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     5.0.1
+// @version     5.1.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -278,10 +278,12 @@ if (sovietsCloset.test(window.location)) {
 			// Button styles, copied from existing buttons on the page for visual consistency.
 			const buttonClasses = 'v-btn v-btn--outlined theme--dark v-size--default';
 
+			// Buttons div
 			const buttonContainer = GM_addElement(document.querySelector('.v-main__wrap'), 'div', {
 				id: 'watchProgressButtons'
 			});
 
+			// Autoplay
 			const buttonAutoplay = GM_addElement(buttonContainer, 'button', {
 				id: 'toggleAutoplay',
 				class: buttonClasses,
@@ -292,16 +294,7 @@ if (sovietsCloset.test(window.location)) {
 				textContent: `Autoplay: ${autoplayState ? 'On' : 'Off'}`
 			});
 
-			const buttonWatched = GM_addElement(buttonContainer, 'button', {
-				id: 'markWatched',
-				class: buttonClasses,
-				type: 'button'
-			});
-			const spanWatched = GM_addElement(buttonWatched, 'span', {
-				class: 'v-btn__content',
-				textContent: 'Mark Watched'
-			});
-
+			// Unwatched
 			const buttonUnwatched = GM_addElement(buttonContainer, 'button', {
 				id: 'markUnwatched',
 				class: buttonClasses,
@@ -310,6 +303,17 @@ if (sovietsCloset.test(window.location)) {
 			const spanUnwatched = GM_addElement(buttonUnwatched, 'span', {
 				class: 'v-btn__content',
 				textContent: 'Mark Unwatched'
+			});
+
+			// Watched
+			const buttonWatched = GM_addElement(buttonContainer, 'button', {
+				id: 'markWatched',
+				class: buttonClasses,
+				type: 'button'
+			});
+			const spanWatched = GM_addElement(buttonWatched, 'span', {
+				class: 'v-btn__content',
+				textContent: 'Mark Watched'
 			});
 
 			buttonAutoplay.onclick = function() {
