@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     5.1.0
+// @version     5.1.1
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -214,7 +214,8 @@ if (sovietsCloset.test(window.location)) {
 					item.querySelector('.v-list-item__icon').textContent = '✓';
 				} else if (videos[vidID].progress > 0) {
 					// If the video is not marked as done, but has progress, apply a gradient to the text based on watch percentage.
-					span.style.backgroundImage = `line-gradient(to right, green 0%, green ${(videos[vidID].progress / videos[vidID].max) * 100}%, grey 0%, grey 100%)`;
+					let progressPercent = (videos[vidID].progress / videos[vidID].max) * 100
+					span.style.backgroundImage = `linear-gradient(to right, green 0%, green ${progressPercent}%, grey ${progressPercent}%, grey 100%)`;
 					span.classList.add('v-progress');
 				}
 			}
