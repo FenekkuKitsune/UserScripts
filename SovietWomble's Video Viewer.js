@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     5.0.0
+// @version     5.0.1
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -47,21 +47,32 @@ const sovietsStyles = `
  * Waits for an element to be added to the DOM.
  * 
  * @param {string} selector - The CSS selector of the element to wait for.
+ * @param {number} [timeout=10000] - How long to wait for the element.
  * @returns {Promise<HTMLElement>} A promise that resolves with the found element.
  */
-function waitForElm(selector) {
-	return new Promise(resolve => {
+function waitForElm(selector, timeout = 10000) {
+	return new Promise((resolve, reject) => {
+		// Immediately check if the element exists, and resolve if it does.
 		if (document.querySelector(selector)) {
 			return resolve(document.querySelector(selector));
 		}
 
+		// Reject if the element doesn't appear in X time.
+		const timeoutElm = setTimeout(() => {
+			elmObserver.disconnect();
+			reject(new Error(`Element ${selector} not found within ${timeout}ms`));
+		}, timeout);
+
+		// Otherwise, create an observer to wait for the element to exist.
 		const elmObserver = new MutationObserver(mutations => {
 			if (document.querySelector(selector)) {
+				clearTimeout(timeoutElm);
 				elmObserver.disconnect()
 				resolve(document.querySelector(selector));
 			}
 		});
 
+		// Start the observer, watching all children and subtrees.
 		elmObserver.observe(document.body, {
 			childList: true,
 			subtree: true
