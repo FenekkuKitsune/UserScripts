@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     6.0.0
+// @version     6.0.1
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -502,7 +502,9 @@ if (sovietsCloset.test(window.location)) {
 	// Update variables and elements as the webpage is navigated.
 	window.navigation.addEventListener('navigate', (e) => {
 		if (e.destination.url.startsWith('https://sovietscloset.com/video/')) {
-			observeVideoList.disconnect();
+			if (observeVideoList) {
+				observeVideoList.disconnect();
+			}
 
 			setTimeout(() => {
 				// Update video details
