@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     5.1.1
+// @version     5.2.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -144,9 +144,29 @@ function handleKey(e) {
 }
 
 if (mediaDelivery.test(window.location)) {
-	const sendInterval = 1500;
-	let lastSend = Date.now();
+	const sendInterval = 1500; // Throttle interval, only send messages every this milliseconds
+	let lastSend = Date.now(); // The last time a message was sent.
+	const channel = new BroadcastChannel('play-check'); // Broadcast channel
+	const broadcastUID = crypto.randomUUID(); // UID for this tab to prevent responding to self.
+	let checkRequestID = null; // The ID of the broadcast waiting for a response.
 
+	/**
+	 * Helper function to check if the video is currently unpaused.
+	 * 
+	 * @param {HTMLElement} elm - The video element
+	 * @returns {Boolean} Whether or not the video is playing. Returns false if the video object is not found.
+	 */
+	function isPlaying(elm) {
+		const video = elm;
+		return video && !video.paused;
+	}
+
+	/**
+	 * Helper function to post the message to the parent window.
+	 * 
+	 * @param {HTMLElement} elm - The video element
+	 * @private
+	 */
 	function sendProgress(elm) {
 		window.parent.postMessage(
 			{
@@ -172,6 +192,45 @@ if (mediaDelivery.test(window.location)) {
 
 		// Also track for when the video is paused
 		elm.addEventListener('pause', () => { sendProgress(elm) });
+
+		// Broadcast listener
+		channel.onmessage = (e) => {
+			const { type, requestID, senderID } = e.data;
+
+			// Tab receives a "Check" request from another tab.
+			if (type === 'CHECK_PLAYING' && senderID !== broadcastUID) {
+				if (isPlaying(elm)) {
+					// If our video is playing, block the other tab from playing
+					channel.postMessage({
+						type: 'IS_PLAYING',
+						requestID: requestID,
+						senderID: broadcastUID
+					});
+				}
+			}
+
+			// Tab receives a "Block" signal
+			if (type === 'IS_PLAYING' && requestID === checkRequestID) {
+				elm.removeAttribute('autoplay')
+				elm.pause();
+
+				checkRequestID = null;
+			}
+		}
+
+		// Broadcast play check
+		if (elm.hasAttribute('autoplay')) {
+			const requestID = crypto.randomUUID();
+			checkRequestID = requestID;
+
+			// Response is handled in the above broadcast listener
+			// Code does nothing if a response isn't received.
+			channel.postMessage({
+				type: 'CHECK_PLAYING',
+				requestID: requestID,
+				senderID: broadcastUID
+			});
+		}
 	});
 
 	addGlobalListeners((e) => {
