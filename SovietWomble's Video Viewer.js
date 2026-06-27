@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     5.2.0
+// @version     6.0.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -280,11 +280,178 @@ if (sovietsCloset.test(window.location)) {
 			}
 		}
 	}
+	
+	/**
+	 * Updates the seek time of the video frame.
+	 * 
+	 * @param {HTMLIFrameElement} frame - The video frame to update.
+	 * @param {boolean} autoplay - Whether or not Autoplay is enabled.
+	 * @param {number} time - The new seek time.
+	 */
+	function updateSeekTime(frame, autoplay, time) {
+		// Get frame src attribute
+		const src = frame.getAttribute('src');
+
+		// Remove the src arguments
+		const srcWithoutArgs = src.split('?')[0];
+
+		// Add our own arguments to the src.
+		const srcWithArgs = srcWithoutArgs + `?autoplay=${autoplay}&t=${time}`;
+
+		// Replace the src on the frame
+		frame.setAttribute('src', srcWithArgs);
+	}
+
+	/**
+	 * Ensures a video record exists in the videos object and if not, creates one.
+	 * 
+	 * @param {string} vidID - The video ID found in the URL pathname.
+	 * @param {string} vidTitle - The video title, derived from the page's h2 and h3 elements.
+	 */
+	function ensureVideoRecord(vidID, vidTitle) {
+		videos[vidID] ??= {
+			title: vidTitle,
+			progress: 0,
+			max: -1,
+			done: false
+		}
+	}
+
+	/**
+	 * Creates "Mark Watched" and "Mark Unwatched" buttons.
+	 * 
+	 * @param {HTMLElement} addTo - The element to which the buttons will be added.
+	 */
+	function updateVideoDOM() {
+		// Button styles, copied from existing buttons on the page for visual consistency.
+		const buttonClasses = 'v-btn v-btn--outlined theme--dark v-size--default';
+
+		// Buttons div
+		const buttonContainer = GM_addElement(document.querySelector('.v-main__wrap'), 'div', {
+			id: 'watchProgressButtons'
+		});
+
+		// Autoplay
+		const buttonAutoplay = GM_addElement(buttonContainer, 'button', {
+			id: 'toggleAutoplay',
+			class: buttonClasses,
+			type: 'button'
+		})
+		const spanAutoplay = GM_addElement(buttonAutoplay, 'span', {
+			class: 'v-btn__content',
+			textContent: `Autoplay: ${autoplayState ? 'On' : 'Off'}`
+		});
+
+		// Unwatched
+		const buttonUnwatched = GM_addElement(buttonContainer, 'button', {
+			id: 'markUnwatched',
+			class: buttonClasses,
+			type: 'button'
+		});
+		const spanUnwatched = GM_addElement(buttonUnwatched, 'span', {
+			class: 'v-btn__content',
+			textContent: 'Mark Unwatched'
+		});
+
+		// Watched
+		const buttonWatched = GM_addElement(buttonContainer, 'button', {
+			id: 'markWatched',
+			class: buttonClasses,
+			type: 'button'
+		});
+		const spanWatched = GM_addElement(buttonWatched, 'span', {
+			class: 'v-btn__content',
+			textContent: 'Mark Watched'
+		});
+
+		buttonAutoplay.onclick = function() {
+			autoplayState = !autoplayState;
+
+			localStorage.setItem('autoplay', autoplayState);
+
+			this.querySelector('span').textContent = `Autoplay: ${autoplayState ? 'On' : 'Off'}`;
+		}
+
+		buttonWatched.onclick = function() {
+			// Mark the video as done and save it to localStorage.
+			const vidID = window.location.pathname.match(/\d+/)[0];
+			videos[vidID].done = true;
+			localStorage.setItem('videoProgress', JSON.stringify(videos));
+
+			// Apply the 'green' background color to the "Mark Watched" button, and remove it from the "Mark Unwatched" button.
+			this.style.backgroundColor = 'green';
+			buttonUnwatched.style.backgroundColor = '';
+		}
+
+		buttonUnwatched.onclick = function() {
+			// Reset the video by removing the seek time parameter from the iframe src.
+			const vidFrame = document.querySelector('iframe');
+			vidFrame.setAttribute('src', vidFrame.getAttribute('src').split('&t=')[0]);
+
+			// Mark the video as not done with 0 progress, and save it to localStorage.
+			const vidID = window.location.pathname.match(/\d+/)[0];
+			videos[vidID].done = false;
+			videos[vidID].progress = 0;
+			localStorage.setItem('videoProgress', JSON.stringify(videos));
+
+			// Apply the 'green' background color to the "Mark Unwatched" button, and remove it from the "Mark Watched" button.
+			this.style.backgroundColor = 'green';
+			buttonWatched.style.backgroundColor = '';
+		}
+
+		// Update the video list when the drawer is opened
+		const vListBtn = document.querySelector('.mr-3.mt-3 > button');
+
+		vListBtn.addEventListener('click', () => {
+			const vDrawer = document.querySelector('.v-navigation-drawer');
+
+			if (vDrawer.classList.contains('v-navigation-drawer--open')) {
+				processVideoListItems(document.querySelector('.v-list'));
+			}
+		});
+	}
+
+	/**
+	 * Updates the video list items as they appear with their relevant video progress values.
+	 */
+	function observeVideoListUpdates() {
+		// Initially process any video list items that are already in the DOM.
+		processVideoListItems();
+
+		// Root node to observe for changes, which will be either the expansion panel if it exists, or the body if it doesn't.
+		const root = document.querySelector('.v-expansion-panels') || document.body;
+
+		observeVideoList = new MutationObserver((mutations) => {
+			mutations.forEach((mutation) => {
+				mutation.addedNodes.forEach((node) => {
+					if (!(node instanceof Element)) {
+						// Skip nodes that aren't elements, as they can't contain video list items.
+						return;
+					}
+
+					if (
+						node.matches('.v-expansion-panel, .v-expansion-panel-content') ||
+						node.querySelector('.v-expansion-panel, .v-expansion-panel-content')
+					) {
+						// Process video list items within the added node if it is valid.
+						processVideoListItems(node);
+					}
+				});
+			});
+		});
+
+		observeVideoList.observe(root, {
+			childList: true,
+			subtree: true
+		});
+	}
 
 	// Add custom styles to the DOM.
 	const styles = GM_addStyle(sovietsStyles);
 	// Set a timeout for loading elements, as certain elements load at a delay.
 	const elLoadTimeout = 250;
+	// Observer and timer constants
+	let observeVideoList = null;
 
 	// Load video progress from localStorage, or initialize it if it doesn't exist.
 	let videos = JSON.parse(localStorage.getItem('videoProgress'));
@@ -293,136 +460,6 @@ if (sovietsCloset.test(window.location)) {
 	autoplayState = autoplayState === null ? true : autoplayState === 'true';
 
 	if (sovietsVideos.test(window.location)) {
-		/**
-		 * Updates the seek time of the video frame.
-		 * 
-		 * @param {HTMLIFrameElement} frame - The video frame to update.
-		 * @param {boolean} autoplay - Whether or not Autoplay is enabled.
-		 * @param {number} time - The new seek time.
-		 */
-		function updateSeekTime(frame, autoplay, time) {
-			// Get frame src attribute
-			const src = frame.getAttribute('src');
-
-			// Remove the src arguments
-			const srcWithoutArgs = src.split('?')[0];
-
-			// Add our own arguments to the src.
-			const srcWithArgs = srcWithoutArgs + `?autoplay=${autoplay}&t=${time}`;
-
-			// Replace the src on the frame
-			frame.setAttribute('src', srcWithArgs);
-		}
-
-		/**
-		 * Ensures a video record exists in the videos object and if not, creates one.
-		 * 
-		 * @param {string} vidID - The video ID found in the URL pathname.
-		 * @param {string} vidTitle - The video title, derived from the page's h2 and h3 elements.
-		 */
-		function ensureVideoRecord(vidID, vidTitle) {
-			videos[vidID] ??= {
-				title: vidTitle,
-				progress: 0,
-				max: -1,
-				done: false
-			}
-		}
-
-		/**
-		 * Creates "Mark Watched" and "Mark Unwatched" buttons.
-		 * 
-		 * @param {HTMLElement} addTo - The element to which the buttons will be added.
-		 */
-		function updateVideoDOM() {
-			// Button styles, copied from existing buttons on the page for visual consistency.
-			const buttonClasses = 'v-btn v-btn--outlined theme--dark v-size--default';
-
-			// Buttons div
-			const buttonContainer = GM_addElement(document.querySelector('.v-main__wrap'), 'div', {
-				id: 'watchProgressButtons'
-			});
-
-			// Autoplay
-			const buttonAutoplay = GM_addElement(buttonContainer, 'button', {
-				id: 'toggleAutoplay',
-				class: buttonClasses,
-				type: 'button'
-			})
-			const spanAutoplay = GM_addElement(buttonAutoplay, 'span', {
-				class: 'v-btn__content',
-				textContent: `Autoplay: ${autoplayState ? 'On' : 'Off'}`
-			});
-
-			// Unwatched
-			const buttonUnwatched = GM_addElement(buttonContainer, 'button', {
-				id: 'markUnwatched',
-				class: buttonClasses,
-				type: 'button'
-			});
-			const spanUnwatched = GM_addElement(buttonUnwatched, 'span', {
-				class: 'v-btn__content',
-				textContent: 'Mark Unwatched'
-			});
-
-			// Watched
-			const buttonWatched = GM_addElement(buttonContainer, 'button', {
-				id: 'markWatched',
-				class: buttonClasses,
-				type: 'button'
-			});
-			const spanWatched = GM_addElement(buttonWatched, 'span', {
-				class: 'v-btn__content',
-				textContent: 'Mark Watched'
-			});
-
-			buttonAutoplay.onclick = function() {
-				autoplayState = !autoplayState;
-
-				localStorage.setItem('autoplay', autoplayState);
-
-				this.querySelector('span').textContent = `Autoplay: ${autoplayState ? 'On' : 'Off'}`;
-			}
-
-			buttonWatched.onclick = function() {
-				// Mark the video as done and save it to localStorage.
-				const vidID = window.location.pathname.match(/\d+/)[0];
-				videos[vidID].done = true;
-				localStorage.setItem('videoProgress', JSON.stringify(videos));
-
-				// Apply the 'green' background color to the "Mark Watched" button, and remove it from the "Mark Unwatched" button.
-				this.style.backgroundColor = 'green';
-				buttonUnwatched.style.backgroundColor = '';
-			}
-
-			buttonUnwatched.onclick = function() {
-				// Reset the video by removing the seek time parameter from the iframe src.
-				const vidFrame = document.querySelector('iframe');
-				vidFrame.setAttribute('src', vidFrame.getAttribute('src').split('&t=')[0]);
-
-				// Mark the video as not done with 0 progress, and save it to localStorage.
-				const vidID = window.location.pathname.match(/\d+/)[0];
-				videos[vidID].done = false;
-				videos[vidID].progress = 0;
-				localStorage.setItem('videoProgress', JSON.stringify(videos));
-
-				// Apply the 'green' background color to the "Mark Unwatched" button, and remove it from the "Mark Watched" button.
-				this.style.backgroundColor = 'green';
-				buttonWatched.style.backgroundColor = '';
-			}
-
-			// Update the video list when the drawer is opened
-			const vListBtn = document.querySelector('.mr-3.mt-3 > button');
-
-			vListBtn.addEventListener('click', () => {
-				const vDrawer = document.querySelector('.v-navigation-drawer');
-
-				if (vDrawer.classList.contains('v-navigation-drawer--open')) {
-					processVideoListItems(document.querySelector('.v-list'));
-				}
-			});
-		}
-
 		// Get video details
 		let vidID = window.location.pathname.match(/\d+/)[0];
 		let vidTitle = `${document.querySelector('h2').textContent} - ${document.querySelector('h3').textContent}`;
@@ -446,34 +483,6 @@ if (sovietsCloset.test(window.location)) {
 			}
 		});
 
-		// Update variables and elements as the webpage is navigated.
-		window.navigation.addEventListener('navigate', (e) => {
-			if (e.destination.url.startsWith('https://sovietscloset.com/video/')) {
-				setTimeout(() => {
-					// Update video details
-					vidID = window.location.pathname.match(/\d+/)[0];
-					vidTitle = `${document.querySelector('h2').textContent} - ${document.querySelector('h3').textContent}`;
-
-					// Ensure a record exists for the new video in the videos object.
-					ensureVideoRecord(vidID, vidTitle);
-
-					// Update the video frame variable to the new video's iframe.
-					vidFrame = document.querySelector('iframe');
-
-					// Update the seek time of the new video if it has progress, so that navigation between videos retains progress.
-					if (videos[vidID].progress > 0) {
-						updateSeekTime(vidFrame, autoplayState, videos[vidID].progress);
-					}
-
-					// Create new watched/unwatched buttons for the new video
-					// As well as update the video list.
-
-					updateVideoDOM();
-					processVideoListItems(document.querySelector('.v-list'));
-				}, elLoadTimeout);
-			}
-		});
-
 		setTimeout(() => {
 			// Update the seek time of the video if it has progress.
 			if (videos[vidID].progress > 0) {
@@ -484,44 +493,41 @@ if (sovietsCloset.test(window.location)) {
 			updateVideoDOM();
 			processVideoListItems(document.querySelector('.v-list'));
 		}, elLoadTimeout);
-	} else {
-		/**
-		 * Updates the video list items as they appear with their relevant video progress values.
-		 */
-		function observeVideoListUpdates() {
-			// Initially process any video list items that are already in the DOM.
-			processVideoListItems();
-
-			// Root node to observe for changes, which will be either the expansion panel if it exists, or the body if it doesn't.
-			const root = document.querySelector('.v-expansion-panels') || document.body;
-
-			const listObserver = new MutationObserver((mutations) => {
-				mutations.forEach((mutation) => {
-					mutation.addedNodes.forEach((node) => {
-						if (!(node instanceof Element)) {
-							// Skip nodes that aren't elements, as they can't contain video list items.
-							return;
-						}
-
-						if (
-							node.matches('.v-expansion-panel, .v-expansion-panel-content') ||
-							node.querySelector('.v-expansion-panel, .v-expansion-panel-content')
-						) {
-							// Process video list items within the added node if it is valid.
-							processVideoListItems(node);
-						}
-					});
-				});
-			});
-
-			listObserver.observe(root, {
-				childList: true,
-				subtree: true
-			});
-		}
-
+	} else if (sovietsCloset.test(window.location)) {
 		setTimeout(() => {
 			observeVideoListUpdates();
 		}, elLoadTimeout);
 	}
+
+	// Update variables and elements as the webpage is navigated.
+	window.navigation.addEventListener('navigate', (e) => {
+		if (e.destination.url.startsWith('https://sovietscloset.com/video/')) {
+			observeVideoList.disconnect();
+
+			setTimeout(() => {
+				// Update video details
+				vidID = window.location.pathname.match(/\d+/)[0];
+				vidTitle = `${document.querySelector('h2').textContent} - ${document.querySelector('h3').textContent}`;
+
+				// Ensure a record exists for the new video in the videos object.
+				ensureVideoRecord(vidID, vidTitle);
+
+				// Update the video frame variable to the new video's iframe.
+				vidFrame = document.querySelector('iframe');
+
+				// Update the seek time of the new video if it has progress, so that navigation between videos retains progress.
+				if (videos[vidID].progress > 0) {
+					updateSeekTime(vidFrame, autoplayState, videos[vidID].progress);
+				}
+
+				// Create new watched/unwatched buttons for the new video
+				// As well as update the video list.
+
+				updateVideoDOM();
+				processVideoListItems(document.querySelector('.v-list'));
+			}, elLoadTimeout);
+		} else if (e.destination.url.startsWith('https://sovietscloset.com/')) {
+			observeVideoListUpdates();
+		}
+	});
 }
