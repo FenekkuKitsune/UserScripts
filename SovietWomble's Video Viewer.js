@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     6.0.1
+// @version     6.0.2
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -505,6 +505,19 @@ if (sovietsCloset.test(window.location)) {
 			if (observeVideoList) {
 				observeVideoList.disconnect();
 			}
+
+			addGlobalListeners((e) => {
+				if (e.origin === 'https://iframe.mediadelivery.net' && e.data?.prog) {
+					// If we're tracking progress for this video, update the video's progress as it plays.
+					const vidProgress = Math.floor(e.data.prog);
+
+					if (vidProgress > videos[vidID].progress) {
+						videos[vidID].progress = Math.floor(e.data.prog);
+						videos[vidID].max = Math.floor(e.data.max);
+						localStorage.setItem('videoProgress', JSON.stringify(videos));
+					}
+				}
+			});
 
 			setTimeout(() => {
 				// Update video details
