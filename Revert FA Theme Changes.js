@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.0.6
+// @version     3.0.7
 //
 // @match       https://www.furaffinity.net/view/*
 // @grant       GM_addStyle
@@ -14,11 +14,12 @@
 const submissionViewer = new URLPattern({ pathname: '/view/*'});
 
 // Inject CSS
-const styles = GM_addStyle(`
+const styles = `
 /* Revert text-decoration changes to links. */
 a:hover {
 	text-decoration: none !important;
-}`);
+}`;
+GM_addStyle(styles);
 
 if (submissionViewer.test(window.location)) {
 	// Get the mini gallery navigation
