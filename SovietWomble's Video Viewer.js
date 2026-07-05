@@ -238,8 +238,7 @@ if (mediaDelivery.test(window.location)) {
 			vidControl(e.data.control);
 		}
 	});
-}
-if (sovietsCloset.test(window.location)) {
+} else if (sovietsCloset.test(window.location)) {
 	/**
 	 * Processes the video list items and updates their display based on watch progress.
 	 * 
