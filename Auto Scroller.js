@@ -17,14 +17,14 @@ const itaku = new URLPattern({ hostname: 'itaku.ee' });
 const bskyStyles = `
 #AutoScrollToggle {
 	position: fixed;
-	top: 0.75em;
-	right: 0.75em;
+	top: 5vh;
+	right: 5vw;
 }`;
 const itakuStyles = `
 #AutoScrollToggle {
 	position: fixed;
-	top: 9em;
-	right: 0.75em;
+	top: 10vh;
+	right: 15vw;
 }`;
 
 function doScrolling(elm) {
@@ -32,6 +32,12 @@ function doScrolling(elm) {
 
 	elm.textContent = "Auto Scroll: " + (elm.textContent.endsWith("Off") ? "On" : "Off");
 }
+
+window.addEventListener('keydown', (e) => {
+	if (e.key === 's' && e.altKey) {
+		doScrolling(scrollToggle);
+	}
+});
 
 if (bsky.test(window.location)) {
 	GM_addStyle(bskyStyles);
