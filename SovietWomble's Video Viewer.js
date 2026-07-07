@@ -124,7 +124,7 @@ function handleKey(e) {
 
 	let control = null;
 	for (const [key, keys] of Object.entries(hotkeys)) {
-		if (keys.includes(e.code)) {
+		if (keys.includes(e.key)) {
 			control = key;
 			break;
 		}
