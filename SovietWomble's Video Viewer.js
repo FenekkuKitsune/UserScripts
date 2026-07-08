@@ -119,7 +119,7 @@ function handleKey(e) {
 	const hotkeys = {
 		'rewind': ['ArrowLeft'],
 		'fast-forward': ['ArrowRight'],
-		'play': ['KeyK', 'Space']
+		'play': ['', ' ']
 	};
 
 	let control = null;
