@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     6.0.3
+// @version     6.1.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -86,15 +86,31 @@ function waitForElm(selector, timeout = 10000) {
  * @param {'play' | 'rewind' | 'fast-forward'} control - The control command to execute.
  */
 function vidControl(control) {
+	const seekAmount = 10;
+	const video = document.querySelector('video');
+	if (!video) {
+		console.warn('Video element not found. Cannot control video.');
+		return;
+	}
 	switch (control) {
 		case 'play':
-			document.querySelector('button[data-plyr="play"]').click();
+			if (video.paused) {
+				video.play();
+			} else {
+				video.pause();
+			}
 			break;
 		case 'rewind':
-			document.querySelector('button[data-plyr="rewind"]').click();
+			video.currentTime = Math.max(0, video.currentTime - seekAmount);
 			break;
 		case 'fast-forward':
-			document.querySelector('button[data-plyr="fast-forward"]').click();
+			video.currentTime = Math.min(video.duration, video.currentTime + seekAmount);
+			break;
+		case 'step-back':
+			video.currentTime = Math.max(0, video.currentTime - 1);
+			break;
+		case 'step-forward':
+			video.currentTime = Math.min(video.duration, video.currentTime + 1);
 			break;
 	}
 }
@@ -119,6 +135,8 @@ function handleKey(e) {
 	const hotkeys = {
 		'rewind': ['ArrowLeft'],
 		'fast-forward': ['ArrowRight'],
+		'step-back': [','],
+		'step-forward': ['.'],
 		'play': ['k', ' ']
 	};
 
