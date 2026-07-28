@@ -13,8 +13,8 @@
 // @description Video progress tracking and hotkeys for SovietWomble's VOD archive.
 // ==/UserScript==
 const mediaDelivery = new URLPattern({ hostname: 'iframe.mediadelivery.net', pathname: '/embed/5105/*' });
-const sovietsCloset = new URLPattern({ hostname: 'sovietscloset.com'});
-const sovietsVideos = new URLPattern({ pathname: '/video/*'});
+const sovietsCloset = new URLPattern({ hostname: 'sovietscloset.com' });
+const sovietsVideos = new URLPattern({ pathname: '/video/*' });
 const sovietsStyles = `
 #watchProgressButtons {
 	position: absolute;
