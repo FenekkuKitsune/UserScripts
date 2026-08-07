@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.0.8
+// @version     3.0.9
 //
 // @match       https://www.furaffinity.net/view/*
 // @grant       GM_addStyle
@@ -31,10 +31,15 @@ if (submissionViewer.test(window.location)) {
 
 		// Find the 'new' buttons.
 		let navNewer;
+		let navOlder;
 		if (navButtons.length > 1) {
 			navNewer = navButtons[0];
+			navOlder = navButtons[navButtons.length - 1];
+		} else if (navButtons[0].textContent.includes("Newer")) {
+			navNewer = navButtons[0];
+		} else {
+			navOlder = navButtons[0];
 		}
-		let navOlder = navButtons[navButtons.length - 1];
 
 		// Hide the new navigation buttons
 		galleryNav.style.display = 'none';
