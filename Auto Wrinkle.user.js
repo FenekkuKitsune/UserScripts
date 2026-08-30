@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Auto Wrinkle
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     0.0.7
+// @version     0.0.8
 //
 // @match       https://orteil.dashnet.org/cookieclicker/*
 // @grant       none
@@ -15,9 +15,13 @@ let AutoWrinkle = {
 	Max: 0
 };
 function FillWrinklers() {
-	for (let i = 0; i < AutoWrinkle.Amt; i++) {
-		Game.SpawnWrinkler();
+	let count = 0;
+
+	while (Game.SpawnWrinkler()) {
+		count++;
 	}
+
+	AutoWrinkle.Amt = count;
 }
 function CheckWrinklers() {
 	let max = AutoWrinkle.Max;
