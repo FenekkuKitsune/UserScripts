@@ -81,5 +81,15 @@ function startWrinklers() {
 
 	const wrinkleCheck = setInterval(checkWrinklers, 1000);
 }
+function waitForGame() {
+	if (typeof Game !== "undefined" &&
+		typeof Game.CollectWrinklers === "function" &&
+		Array.isArray(Game.wrinklers)) {
+		
+		startWrinklers();
+	} else {
+		setTimeout(waitForGame, 100);
+	}
+}
 
-startWrinklers();
+waitForGame();
