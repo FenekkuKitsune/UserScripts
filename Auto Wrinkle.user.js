@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Auto Wrinkle
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     0.1.3
+// @version     0.1.4
 //
 // @match       https://orteil.dashnet.org/cookieclicker/*
 // @grant       none
@@ -12,7 +12,7 @@
 // ==/UserScript==
 let autoWrinkle = {
 	wrinklers: [],
-	reservePercent: 0.5,
+	thresholdPercent: 0.5,
 	updatePercent: 2.0,
 	popWait: 20
 };
@@ -20,7 +20,7 @@ function popWrinkler(id) {
 	Game.wrinklers[id].hp = 0;
 
 	autoWrinkle.wrinklers[id] = {
-		reserve: 0,
+		threshold: 0,
 		updateAt: 0,
 		exists: false
 	}
@@ -30,7 +30,7 @@ function popWrinkler(id) {
 			for (let i = 0; i < Game.wrinklers.length; i++) {
 				if (!autoWrinkle.wrinklers[i].exists && Game.wrinklers[i].phase !== 0) {
 					autoWrinkle.wrinklers[i] = {
-						reserve: (Game.cookies * autoWrinkle.reservePercent),
+						threshold: (Game.cookies * autoWrinkle.thresholdPercent),
 						updateAt: (Game.cookies * autoWrinkle.updatePercent),
 						exists: true
 					};
@@ -47,12 +47,12 @@ function checkWrinklers() {
 			continue;
 		}
 
-		if (Game.cookies <= autoWrinkle.wrinklers[i].reserve) {
+		if (Game.cookies <= autoWrinkle.wrinklers[i].threshold) {
 			popWrinkler(i);
 
 			break;
 		} else if (Game.cookies >= autoWrinkle.wrinklers[i].updateAt) {
-			autoWrinkle.wrinklers[i].reserve = (Game.cookies * autoWrinkle.reservePercent);
+			autoWrinkle.wrinklers[i].threshold = (Game.cookies * autoWrinkle.thresholdPercent);
 			autoWrinkle.wrinklers[i].updateAt = (Game.cookies * autoWrinkle.updatePercent);
 		}
 	}
@@ -62,7 +62,7 @@ function startWrinklers() {
 
 	for (let i = 0; i < Game.wrinklers.length; i++) {
 		autoWrinkle.wrinklers.push({
-			reserve: 0,
+			threshold: 0,
 			updateAt: 0,
 			exists: false
 		});
@@ -73,7 +73,7 @@ function startWrinklers() {
 			for (let i = 0; i < Game.wrinklers.length; i++) {
 				if (!autoWrinkle.wrinklers[i].exists && Game.wrinklers[i].phase !== 0) {
 					autoWrinkle.wrinklers[i] = {
-						reserve: (Game.cookies * autoWrinkle.reservePercent),
+						threshold: (Game.cookies * autoWrinkle.thresholdPercent),
 						updateAt: (Game.cookies * autoWrinkle.updatePercent),
 						exists: true
 					};
