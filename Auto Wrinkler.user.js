@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Auto Wrinkler
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     1.0.0
+// @version     1.0.1
 //
 // @match       https://orteil.dashnet.org/cookieclicker/*
 // @grant       none
@@ -14,7 +14,7 @@ let autoWrinkler = {
 	wrinklers: [],
 	thresholdPercent: 0.5,
 	updatePercent: 2.0,
-	popWait: 20
+	popWait: 50
 };
 function popWrinkler(id) {
 	Game.wrinklers[id].hp = 0;
