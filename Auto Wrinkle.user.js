@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Auto Wrinkle
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     0.0.6
+// @version     0.0.7
 //
 // @match       https://orteil.dashnet.org/cookieclicker/*
 // @grant       none
@@ -12,40 +12,42 @@
 // ==/UserScript==
 let AutoWrinkle = {
 	Amt: 10,
-	Full: 0,
 	Max: 0
 };
-function PopWrinklers() {
-	for (let i=0; i<AutoWrinkle.Amt; i++) {
-		Game.PopRandomWrinkler();
-	}
-}
 function FillWrinklers() {
-	for (let i=0; i<AutoWrinkle.Amt; i++) {
+	for (let i = 0; i < AutoWrinkle.Amt; i++) {
 		Game.SpawnWrinkler();
 	}
 }
 function CheckWrinklers() {
-	for (let i=0; i<AutoWrinkle.Amt; i++) {
-		const thisWrinkler = Game.wrinklers[i]
-		if (thisWrinkler.sucked > AutoWrinkle.Max && i > 0) {
-			AutoWrinkle.Max = thisWrinkler.sucked;
+	let max = AutoWrinkle.Max;
 
-			continue;
-		} else if (thisWrinkler.sucked < AutoWrinkle.Max) {
-			continue;
-		} else if (AutoWrinkle.Full < AutoWrinkle.Amt) {
-			AutoWrinkle.Full++;
+	// Find highest amt currently stored
+	for (let i = 0; i < AutoWrinkle.Amt; i++) {
+		const thisWrinkler = Game.wrinklers[i];
 
-			continue;
-		} else {
-			PopWrinklers();
-
-			AutoWrinkle.Full = 0;
-
-			NewWrinklers = setTimeout(FillWrinklers, 250);
+		if (thisWrinkler.sucked > max) {
+			max = thisWrinkler.sucked;
 		}
 	}
+
+	// If the maximum increased, store it and wait for another check before deciding that we're full
+	if (max > AutoWrinkle.Max) {
+		AutoWrinkle.Max = max;
+
+		return;
+	}
+
+	// Check whether every wrinkler has reached the maximum.
+	for (let i = 0; i < AutoWrinkle.Amt; i++) {
+		if (Game.wrinklers[i].sucked < AutoWrinkle.Max) {
+			return;
+		}
+	}
+
+	// Every wrinkler has reached the maximum
+	Game.CollectWrinklers();
+	setTimeout(FillWrinklers, 250);
 }
 
 const WrinkleCheck = setInterval(CheckWrinklers, 1000)
