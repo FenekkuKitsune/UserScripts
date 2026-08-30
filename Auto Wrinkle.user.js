@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Auto Wrinkle
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     0.0.2
+// @version     0.0.3
 //
 // @match       https://orteil.dashnet.org/cookieclicker/*
 //
@@ -38,6 +38,8 @@ function CheckWrinklers() {
 			continue;
 		} else {
 			PopWrinklers();
+
+			FullWrinklers = 0;
 
 			NewWrinklers = setTimeout(FillWrinklers, 250);
 		}
