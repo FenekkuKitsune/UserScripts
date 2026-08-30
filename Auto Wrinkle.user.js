@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name        Auto Wrinkle
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     0.0.5
+// @version     0.0.6
 //
 // @match       https://orteil.dashnet.org/cookieclicker/*
+// @grant       none
 //
 // @author      FenekkuKitsune
 // @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Auto%20Wrinkle.user.js
