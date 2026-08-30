@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Auto Wrinkle
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     0.1.0
+// @version     0.1.1
 //
 // @match       https://orteil.dashnet.org/cookieclicker/*
 // @grant       none
@@ -13,7 +13,8 @@
 let autoWrinkle = {
 	wrinklers: [],
 	reservePercent: 0.75,
-	updatePercent: 2.0
+	updatePercent: 2.0,
+	popWait: 20
 };
 function popWrinkler(id) {
 	Game.wrinklers[id].hp = 0;
@@ -23,20 +24,22 @@ function popWrinkler(id) {
 		updateAt: 0,
 		exists: false
 	}
+	
+	setTimeout(() => {
+		if (Game.SpawnWrinkler()) {
+			for (let i = 0; i < Game.wrinklers.length; i++) {
+				if (!autoWrinkle.wrinklers[i].exists && Game.wrinklers[i].phase !== 0) {
+					autoWrinkle.wrinklers[i] = {
+						reserve: (Game.cookies * autoWrinkle.reservePercent),
+						updateAt: (Game.cookies * autoWrinkle.updatePercent),
+						exists: true
+					};
 
-	if (Game.SpawnWrinkler()) {
-		for (let i = 0; i < Game.wrinklers.length; i++) {
-			if (!autoWrinkle.wrinklers[i].exists && Game.wrinklers[i].phase !== 0) {
-				autoWrinkle.wrinklers[i] = {
-					reserve: (Game.cookies * autoWrinkle.reservePercent),
-					updateAt: (Game.cookies * autoWrinkle.updatePercent),
-					exists: true
-				};
-
-				break;
+					break;
+				}
 			}
 		}
-	}
+	}, autoWrinkle.popWait)
 }
 function checkWrinklers() {
 	for (let i = 0; i < autoWrinkle.wrinklers.length; i++) {
@@ -65,21 +68,23 @@ function startWrinklers() {
 		});
 	}
 
-	while (Game.SpawnWrinkler()) {
-		for (let i = 0; i < Game.wrinklers.length; i++) {
-			if (!autoWrinkle.wrinklers[i].exists && Game.wrinklers[i].phase !== 0) {
-				autoWrinkle.wrinklers[i] = {
-					reserve: (Game.cookies * autoWrinkle.reservePercent),
-					updateAt: (Game.cookies * autoWrinkle.updatePercent),
-					exists: true
-				};
+	setTimeout(() => {
+		while (Game.SpawnWrinkler()) {
+			for (let i = 0; i < Game.wrinklers.length; i++) {
+				if (!autoWrinkle.wrinklers[i].exists && Game.wrinklers[i].phase !== 0) {
+					autoWrinkle.wrinklers[i] = {
+						reserve: (Game.cookies * autoWrinkle.reservePercent),
+						updateAt: (Game.cookies * autoWrinkle.updatePercent),
+						exists: true
+					};
 
-				break;
+					break;
+				}
 			}
 		}
-	}
 
-	const wrinkleCheck = setInterval(checkWrinklers, 1000);
+		const wrinkleCheck = setInterval(checkWrinklers, 1000);
+	}, autoWrinkle.popWait);
 }
 function waitForGame() {
 	if (typeof Game !== "undefined" &&
