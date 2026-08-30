@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.0.9
+// @version     3.1.0
 //
 // @match       https://www.furaffinity.net/view/*
 // @grant       GM_addStyle
 // @grant       GM_addElement
 //
 // @author      FenekkuKitsune
-// @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Revert%20FA%20Theme%20Changes.js
+// @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Revert%20FA%20Theme%20Changes.user.js
 // @description Reverting and fixing early 2026 theme changes.
 // ==/UserScript==
 const submissionViewer = new URLPattern({ pathname: '/view/*'});

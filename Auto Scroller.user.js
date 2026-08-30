@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Auto Scroller
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     1.0.0
+// @version     1.0.1
 //
 // @match       https://bsky.app/*
 // @match       https://itaku.ee/*
@@ -9,7 +9,7 @@
 // @grant       GM_addElement
 //
 // @author      FenekkuKitsune
-// @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Auto%20Scroller.js
+// @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Auto%20Scroller.user.js
 // @description Adds the ability to automatically scroll on certain sites.
 // ==/UserScript==
 const bsky = new URLPattern({ hostname: 'bsky.app' });

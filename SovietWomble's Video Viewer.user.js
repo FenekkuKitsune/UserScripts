@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     6.1.0
+// @version     6.1.1
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -9,7 +9,7 @@
 // @grant       GM_addElement
 //
 // @author      FenekkuKitsune
-// @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/SovietWomble's%20Video%20Viewer.js
+// @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/SovietWomble's%20Video%20Viewer.user.js
 // @description Video progress tracking and hotkeys for SovietWomble's VOD archive.
 // ==/UserScript==
 const mediaDelivery = new URLPattern({ hostname: 'iframe.mediadelivery.net', pathname: '/embed/5105/*' });
