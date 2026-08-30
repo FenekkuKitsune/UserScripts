@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Auto Wrinkle
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     0.1.4
+// @version     0.2.0
 //
 // @match       https://orteil.dashnet.org/cookieclicker/*
 // @grant       none
@@ -24,7 +24,7 @@ function popWrinkler(id) {
 		updateAt: 0,
 		exists: false
 	}
-	
+
 	setTimeout(() => {
 		if (Game.SpawnWrinkler()) {
 			for (let i = 0; i < Game.wrinklers.length; i++) {
@@ -42,19 +42,27 @@ function popWrinkler(id) {
 	}, autoWrinkle.popWait)
 }
 function checkWrinklers() {
+	let bestId = -1;
+	let bestSucked = 0;
+
 	for (let i = 0; i < autoWrinkle.wrinklers.length; i++) {
 		if (!autoWrinkle.wrinklers[i].exists) {
 			continue;
 		}
 
 		if (Game.cookies <= autoWrinkle.wrinklers[i].threshold) {
-			popWrinkler(i);
-
-			break;
+			if (Game.wrinklers[i].sucked > bestSucked) {
+				bestId = i;
+				bestSucked = Game.wrinklers[i].sucked;
+			}
 		} else if (Game.cookies >= autoWrinkle.wrinklers[i].updateAt) {
 			autoWrinkle.wrinklers[i].threshold = (Game.cookies * autoWrinkle.thresholdPercent);
 			autoWrinkle.wrinklers[i].updateAt = (Game.cookies * autoWrinkle.updatePercent);
 		}
+	}
+
+	if (bestId !== -1) {
+		popWrinkler(bestId);
 	}
 }
 function startWrinklers() {
@@ -90,7 +98,7 @@ function waitForGame() {
 	if (typeof Game !== "undefined" &&
 		typeof Game.CollectWrinklers === "function" &&
 		Array.isArray(Game.wrinklers)) {
-		
+
 		startWrinklers();
 	} else {
 		setTimeout(waitForGame, 100);
