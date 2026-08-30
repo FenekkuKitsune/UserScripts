@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Auto Wrinkle
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     0.0.3
+// @version     0.0.4
 //
 // @match       https://orteil.dashnet.org/cookieclicker/*
 //
@@ -10,36 +10,38 @@
 // @description Automatically manages wrinklers in Cookie Clicker
 // ==/UserScript==
 
-WrinklerAmt = 10;
+AutoWrinkle = {
+	Amt: 10,
+	Full: 0,
+	Max: 0
+};
 function PopWrinklers() {
-	for (i=0; i<WrinklerAmt; i++) {
+	for (i=0; i<AutoWrinkle.Amt; i++) {
 		Game.PopRandomWrinkler();
 	}
 }
 function FillWrinklers() {
-	for (i=0; i<WrinklerAmt; i++) {
+	for (i=0; i<AutoWrinkle.Amt; i++) {
 		Game.SpawnWrinkler();
 	}
 }
 function CheckWrinklers() {
-	FullWrinklers = 0;
-	FullAmt = 0;
-	for (i=0; i<WrinklerAmt; i++) {
+	for (i=0; i<AutoWrinkle.Amt; i++) {
 		thisWrinkler = Game.wrinklers[i]
-		if (thisWrinkler.sucked > FullAmt && i > 0) {
-			FullAmt = thisWrinkler.sucked;
+		if (thisWrinkler.sucked > AutoWrinkle.Max && i > 0) {
+			AutoWrinkle.Max = thisWrinkler.sucked;
 
 			continue;
-		} else if (thisWrinkler.sucked < FullAmt) {
+		} else if (thisWrinkler.sucked < AutoWrinkle.Max) {
 			continue;
-		} else if (FullWrinklers < WrinklerAmt) {
-			FullWrinklers++;
+		} else if (AutoWrinkle.Full < AutoWrinkle.Amt) {
+			AutoWrinkle.Full++;
 
 			continue;
 		} else {
 			PopWrinklers();
 
-			FullWrinklers = 0;
+			AutoWrinkle.Full = 0;
 
 			NewWrinklers = setTimeout(FillWrinklers, 250);
 		}
