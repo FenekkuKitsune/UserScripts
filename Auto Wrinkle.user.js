@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Auto Wrinkle
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     0.0.4
+// @version     0.0.5
 //
 // @match       https://orteil.dashnet.org/cookieclicker/*
 //
@@ -9,8 +9,7 @@
 // @updateURL   https://raw.githubusercontent.com/FenekkuKitsune/UserScripts/refs/heads/main/Auto%20Wrinkle.user.js
 // @description Automatically manages wrinklers in Cookie Clicker
 // ==/UserScript==
-
-AutoWrinkle = {
+let AutoWrinkle = {
 	Amt: 10,
 	Full: 0,
 	Max: 0
@@ -27,7 +26,7 @@ function FillWrinklers() {
 }
 function CheckWrinklers() {
 	for (i=0; i<AutoWrinkle.Amt; i++) {
-		thisWrinkler = Game.wrinklers[i]
+		const thisWrinkler = Game.wrinklers[i]
 		if (thisWrinkler.sucked > AutoWrinkle.Max && i > 0) {
 			AutoWrinkle.Max = thisWrinkler.sucked;
 
@@ -48,4 +47,4 @@ function CheckWrinklers() {
 	}
 }
 
-WrinkleCheck = setInterval(CheckWrinklers, 1000)
+const WrinkleCheck = setInterval(CheckWrinklers, 1000)
