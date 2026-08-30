@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Auto Wrinkle
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     0.2.0
+// @version     0.2.1
 //
 // @match       https://orteil.dashnet.org/cookieclicker/*
 // @grant       none
@@ -23,7 +23,7 @@ function popWrinkler(id) {
 		threshold: 0,
 		updateAt: 0,
 		exists: false
-	}
+	};
 
 	setTimeout(() => {
 		if (Game.SpawnWrinkler()) {
@@ -39,7 +39,7 @@ function popWrinkler(id) {
 				}
 			}
 		}
-	}, autoWrinkle.popWait)
+	}, autoWrinkle.popWait);
 }
 function checkWrinklers() {
 	let bestId = -1;

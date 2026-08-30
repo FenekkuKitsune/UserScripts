@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     6.1.1
+// @version     6.1.2
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -67,7 +67,7 @@ function waitForElm(selector, timeout = 10000) {
 		const elmObserver = new MutationObserver(mutations => {
 			if (document.querySelector(selector)) {
 				clearTimeout(timeoutElm);
-				elmObserver.disconnect()
+				elmObserver.disconnect();
 				resolve(document.querySelector(selector));
 			}
 		});
@@ -209,7 +209,7 @@ if (mediaDelivery.test(window.location)) {
 		});
 
 		// Also track for when the video is paused
-		elm.addEventListener('pause', () => { sendProgress(elm) });
+		elm.addEventListener('pause', () => { sendProgress(elm); });
 
 		// Broadcast listener
 		channel.onmessage = (e) => {
@@ -229,12 +229,12 @@ if (mediaDelivery.test(window.location)) {
 
 			// Tab receives a "Block" signal
 			if (type === 'IS_PLAYING' && requestID === checkRequestID) {
-				elm.removeAttribute('autoplay')
+				elm.removeAttribute('autoplay');
 				elm.pause();
 
 				checkRequestID = null;
 			}
-		}
+		};
 
 		// Broadcast play check
 		if (elm.hasAttribute('autoplay')) {
@@ -290,14 +290,14 @@ if (mediaDelivery.test(window.location)) {
 					item.querySelector('.v-list-item__icon').textContent = '✓';
 				} else if (videos[vidID].progress > 0) {
 					// If the video is not marked as done, but has progress, apply a gradient to the text based on watch percentage.
-					let progressPercent = (videos[vidID].progress / videos[vidID].max) * 100
+					let progressPercent = (videos[vidID].progress / videos[vidID].max) * 100;
 					span.style.backgroundImage = `linear-gradient(to right, green 0%, green ${progressPercent}%, grey ${progressPercent}%, grey 100%)`;
 					span.classList.add('v-progress');
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Updates the seek time of the video frame.
 	 * 
@@ -331,7 +331,7 @@ if (mediaDelivery.test(window.location)) {
 			progress: 0,
 			max: -1,
 			done: false
-		}
+		};
 	}
 
 	/**
@@ -353,7 +353,7 @@ if (mediaDelivery.test(window.location)) {
 			id: 'toggleAutoplay',
 			class: buttonClasses,
 			type: 'button'
-		})
+		});
 		const spanAutoplay = GM_addElement(buttonAutoplay, 'span', {
 			class: 'v-btn__content',
 			textContent: `Autoplay: ${autoplayState ? 'On' : 'Off'}`
@@ -387,7 +387,7 @@ if (mediaDelivery.test(window.location)) {
 			localStorage.setItem('autoplay', autoplayState);
 
 			this.querySelector('span').textContent = `Autoplay: ${autoplayState ? 'On' : 'Off'}`;
-		}
+		};
 
 		buttonWatched.onclick = function() {
 			// Mark the video as done and save it to localStorage.
@@ -398,7 +398,7 @@ if (mediaDelivery.test(window.location)) {
 			// Apply the 'green' background color to the "Mark Watched" button, and remove it from the "Mark Unwatched" button.
 			this.style.backgroundColor = 'green';
 			buttonUnwatched.style.backgroundColor = '';
-		}
+		};
 
 		buttonUnwatched.onclick = function() {
 			// Reset the video by removing the seek time parameter from the iframe src.
@@ -414,7 +414,7 @@ if (mediaDelivery.test(window.location)) {
 			// Apply the 'green' background color to the "Mark Unwatched" button, and remove it from the "Mark Watched" button.
 			this.style.backgroundColor = 'green';
 			buttonWatched.style.backgroundColor = '';
-		}
+		};
 
 		// Update the video list when the drawer is opened
 		const vListBtn = document.querySelector('.mr-3.mt-3 > button');
