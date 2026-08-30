@@ -15,17 +15,17 @@ let AutoWrinkle = {
 	Max: 0
 };
 function PopWrinklers() {
-	for (i=0; i<AutoWrinkle.Amt; i++) {
+	for (let i=0; i<AutoWrinkle.Amt; i++) {
 		Game.PopRandomWrinkler();
 	}
 }
 function FillWrinklers() {
-	for (i=0; i<AutoWrinkle.Amt; i++) {
+	for (let i=0; i<AutoWrinkle.Amt; i++) {
 		Game.SpawnWrinkler();
 	}
 }
 function CheckWrinklers() {
-	for (i=0; i<AutoWrinkle.Amt; i++) {
+	for (let i=0; i<AutoWrinkle.Amt; i++) {
 		const thisWrinkler = Game.wrinklers[i]
 		if (thisWrinkler.sucked > AutoWrinkle.Max && i > 0) {
 			AutoWrinkle.Max = thisWrinkler.sucked;
