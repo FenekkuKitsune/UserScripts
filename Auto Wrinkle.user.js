@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Auto Wrinkle
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     0.1.2
+// @version     0.1.3
 //
 // @match       https://orteil.dashnet.org/cookieclicker/*
 // @grant       none
@@ -12,7 +12,7 @@
 // ==/UserScript==
 let autoWrinkle = {
 	wrinklers: [],
-	reservePercent: 0.75,
+	reservePercent: 0.5,
 	updatePercent: 2.0,
 	popWait: 20
 };
