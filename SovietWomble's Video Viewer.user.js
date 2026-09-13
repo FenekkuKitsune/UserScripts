@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        SovietWomble's Video Viewer
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     6.1.2
+// @version     6.2.0
 //
 // @match       https://iframe.mediadelivery.net/embed/5105/*
 // @match       https://sovietscloset.com/*
@@ -27,7 +27,7 @@ const sovietsStyles = `
 }
 
 .container {
-	max-width: none;
+	max-width: none !important;
 }
 
 .flex > div:has(iframe) {
@@ -77,6 +77,37 @@ function waitForElm(selector, timeout = 10000) {
 			childList: true,
 			subtree: true
 		});
+	});
+}
+
+/**
+ * Requests progress data from a target iframe.
+ * 
+ * @param {HTMLElement} target - Target iframe to ask data from
+ * @param {number} [timeout=10000] - How long to wait for a response
+ * @returns {Promise<Object>} A promise that resolves with the data from the iframe.
+ */
+function requestProgress(target, timeout = 10000) {
+	return new Promise((resolve, reject) => {
+		// Wait for a response
+		const handleMessage = (e) => {
+			if (e.origin === 'https://iframe.mediadelivery.net' && e.data?.prog !== undefined) {
+				clearTimeout(timeoutData);
+				window.removeEventListener('message', handleMessage);
+				resolve(e.data);
+			}
+		};
+
+		window.addEventListener('message', handleMessage);
+
+		// Reject if the response doesn't come in X time.
+		const timeoutData = setTimeout(() => {
+			window.removeEventListener('message', handleMessage);
+			reject(new Error(`Data request progress not responded to within ${timeout}ms`));
+		}, timeout);
+
+		// Request the data
+		target.postMessage({ 'request': 'progress' }, 'https://iframe.mediadelivery.net');
 	});
 }
 
@@ -253,7 +284,11 @@ if (mediaDelivery.test(window.location)) {
 
 	addGlobalListeners((e) => {
 		if (e.origin === 'https://sovietscloset.com' && e.data?.control) {
-			vidControl(e.data.control);
+			if (e.data?.control) {
+				vidControl(e.data.control);
+			} else if (e.data?.request === 'progress') {
+				sendProgress(document.querySelector('video'));
+			}
 		}
 	});
 } else if (sovietsCloset.test(window.location)) {
@@ -342,6 +377,7 @@ if (mediaDelivery.test(window.location)) {
 	function updateVideoDOM() {
 		// Button styles, copied from existing buttons on the page for visual consistency.
 		const buttonClasses = 'v-btn v-btn--outlined theme--dark v-size--default';
+		const spanClasses = 'v-btn__content';
 
 		// Buttons div
 		const buttonContainer = GM_addElement(document.querySelector('.v-main__wrap'), 'div', {
@@ -355,30 +391,8 @@ if (mediaDelivery.test(window.location)) {
 			type: 'button'
 		});
 		const spanAutoplay = GM_addElement(buttonAutoplay, 'span', {
-			class: 'v-btn__content',
+			class: spanClasses,
 			textContent: `Autoplay: ${autoplayState ? 'On' : 'Off'}`
-		});
-
-		// Unwatched
-		const buttonUnwatched = GM_addElement(buttonContainer, 'button', {
-			id: 'markUnwatched',
-			class: buttonClasses,
-			type: 'button'
-		});
-		const spanUnwatched = GM_addElement(buttonUnwatched, 'span', {
-			class: 'v-btn__content',
-			textContent: 'Mark Unwatched'
-		});
-
-		// Watched
-		const buttonWatched = GM_addElement(buttonContainer, 'button', {
-			id: 'markWatched',
-			class: buttonClasses,
-			type: 'button'
-		});
-		const spanWatched = GM_addElement(buttonWatched, 'span', {
-			class: 'v-btn__content',
-			textContent: 'Mark Watched'
 		});
 
 		buttonAutoplay.onclick = function() {
@@ -389,16 +403,16 @@ if (mediaDelivery.test(window.location)) {
 			this.querySelector('span').textContent = `Autoplay: ${autoplayState ? 'On' : 'Off'}`;
 		};
 
-		buttonWatched.onclick = function() {
-			// Mark the video as done and save it to localStorage.
-			const vidID = window.location.pathname.match(/\d+/)[0];
-			videos[vidID].done = true;
-			localStorage.setItem('videoProgress', JSON.stringify(videos));
-
-			// Apply the 'green' background color to the "Mark Watched" button, and remove it from the "Mark Unwatched" button.
-			this.style.backgroundColor = 'green';
-			buttonUnwatched.style.backgroundColor = '';
-		};
+		// Unwatched
+		const buttonUnwatched = GM_addElement(buttonContainer, 'button', {
+			id: 'markUnwatched',
+			class: buttonClasses,
+			type: 'button'
+		});
+		const spanUnwatched = GM_addElement(buttonUnwatched, 'span', {
+			class: spanClasses,
+			textContent: 'Mark Unwatched'
+		});
 
 		buttonUnwatched.onclick = function() {
 			// Reset the video by removing the seek time parameter from the iframe src.
@@ -414,6 +428,58 @@ if (mediaDelivery.test(window.location)) {
 			// Apply the 'green' background color to the "Mark Unwatched" button, and remove it from the "Mark Watched" button.
 			this.style.backgroundColor = 'green';
 			buttonWatched.style.backgroundColor = '';
+		};
+
+		// Watched
+		const buttonWatched = GM_addElement(buttonContainer, 'button', {
+			id: 'markWatched',
+			class: buttonClasses,
+			type: 'button'
+		});
+		const spanWatched = GM_addElement(buttonWatched, 'span', {
+			class: spanClasses,
+			textContent: 'Mark Watched'
+		});
+
+		buttonWatched.onclick = function() {
+			// Mark the video as done and save it to localStorage.
+			const vidID = window.location.pathname.match(/\d+/)[0];
+			videos[vidID].done = true;
+			localStorage.setItem('videoProgress', JSON.stringify(videos));
+
+			// Apply the 'green' background color to the "Mark Watched" button, and remove it from the "Mark Unwatched" button.
+			this.style.backgroundColor = 'green';
+			buttonUnwatched.style.backgroundColor = '';
+		};
+
+		// Set video time
+		const buttonSetTime = GM_addElement(buttonContainer, 'button', {
+			id: 'setVideoTime',
+			class: buttonClasses,
+			type: 'button'
+		});
+		const spanSetTime = GM_addElement(buttonSetTime, 'span', {
+			class: spanClasses,
+			textContent: 'Set Video Time to Now'
+		});
+
+		buttonSetTime.onclick = function() {
+			// Request the current time of the video
+			requestProgress(document.querySelector('iframe').contentWindow).then(({ prog, max }) => {
+				// Throw an error if the progress is invalid.
+				if (prog < 0 || prog > max) {
+					throw new Error(`Invalid progress value: 0 < ${prog} < ${max}`);
+				} else {
+					// Update the video's progress in localStorage
+					const vidID = window.location.pathname.match(/\d+/)[0];
+					videos[vidID].progress = Math.floor(prog);
+					videos[vidID].max = Math.floor(max);
+					localStorage.setItem('videoProgress', JSON.stringify(videos));
+
+					// Apply the 'green' background color to the button.
+					this.style.backgroundColor = 'green';
+				}
+			});
 		};
 
 		// Update the video list when the drawer is opened
