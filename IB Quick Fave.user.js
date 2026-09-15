@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        IB Quick Fave
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     1.0.0
+// @version     1.0.1
 //
 // @match       https://inkbunny.net/submissionsviewall.php*
 // @match       https://inkbunny.net/gallery/*
