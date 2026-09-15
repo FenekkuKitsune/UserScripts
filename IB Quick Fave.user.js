@@ -162,7 +162,7 @@ for (let i = 0; i < submissions.length; i++) {
 	elms.menuTwoButton.addEventListener('click', (e) => {
 		setStars(elms.id, 2).then(() => {
 			elms.menuOneImg.src = stars.off[0]
-			elms.menuOneImg.src = stars.on[1]
+			elms.menuTwoImg.src = stars.on[1]
 			elms.menuThreeImg.src = stars.off[2]
 		}).catch((err) => {
 			console.error(err);
@@ -172,7 +172,7 @@ for (let i = 0; i < submissions.length; i++) {
 		setStars(elms.id, 3).then(() => {
 			elms.menuOneImg.src = stars.off[0]
 			elms.menuTwoImg.src = stars.off[1]
-			elms.menuOneImg.src = stars.on[2]
+			elms.menuThreeImg.src = stars.on[2]
 		}).catch((err) => {
 			console.error(err);
 		});
