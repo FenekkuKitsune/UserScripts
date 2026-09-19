@@ -8,4 +8,12 @@ Improves the video viewer by increasing the size. Adds video progress tracking a
 
 ## Revert FA Theme Changes
 
-Reverts various changes made to Furaffinity by the FA devs.
+Moves the Newer / Older buttons on the submission viewer page back into the menu instead of being in the carousel.
+
+## Auto Scroller
+
+Adds an auto scroll function to certain gallery sites for laziness.
+
+## IB Quick Fave
+
+Adds the ability to star posts from gallery view, without having to open the post's page first.
