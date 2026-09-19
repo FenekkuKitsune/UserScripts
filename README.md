@@ -1,10 +1,10 @@
 # UserScripts
 
-Various personal user scripts to be used by JS injector extensions for various websites.
+Various personal user scripts to be used by JS injector extensions such as Violentmonkey for various websites.
 
 ## SovietWomble's Video Viewer
 
-Improves the video viewer by increasing the size. Adds video progress tracking and displays for tracking video completion progress.
+Improves the video viewer on Soviet's Closet by rudimentally increasing the size 'theater mode' if you will. Adds video progress tracking and the ability to automatically navigate to watch progress, as well as an autoplay toggle. Additionally, prevents multiple videos from playing at once if autoplay is enabled (only works for the one site).
 
 ## Revert FA Theme Changes
 
@@ -12,7 +12,7 @@ Moves the Newer / Older buttons on the submission viewer page back into the menu
 
 ## Auto Scroller
 
-Adds an auto scroll function to certain gallery sites for laziness.
+Adds an auto scroll function to certain gallery sites for laziness. Keybind Alt+S or clicking the on-page tool.
 
 ## IB Quick Fave
 
