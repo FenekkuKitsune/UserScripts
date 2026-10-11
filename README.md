@@ -4,16 +4,19 @@ Various personal user scripts to be used by JS injector extensions such as Viole
 
 ## SovietWomble's Video Viewer
 
-Improves the video viewer on Soviet's Closet by rudimentally increasing the size 'theater mode' if you will. Adds video progress tracking and the ability to automatically navigate to watch progress, as well as an autoplay toggle. Additionally, prevents multiple videos from playing at once if autoplay is enabled (only works for the one site).
+- Rudimentally increases the size of the video player to 'theater mode'. Very rudimentary, likely won't work on all screen sizes.
+- Adds video progress tracking and autoplay.
+- Prevents multiple videos from autoplaying at once on the same site.
 
 ## Revert FA Theme Changes
 
-Moves the Newer / Older buttons on the submission viewer page back into the menu instead of being in the carousel.
+- Moves the Newer / Older buttons on the submission viewer page back into the menu instead of being in the carousel.
+- Automatically marks all announcements as read when news banners are dismissed.
 
 ## Auto Scroller
 
-Adds an auto scroll function to certain gallery sites for laziness. Keybind Alt+S or clicking the on-page tool.
+- Adds an auto scroll function to sites such as: Bluesky, Itaku. Alt+S keybind.
 
 ## IB Quick Fave
 
-Adds the ability to star posts from gallery view, without having to open the post's page first.
+- Adds the ability to star posts from gallery view, without having to open the post's page first.
