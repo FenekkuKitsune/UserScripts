@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name        Revert FA Theme Changes
 // @namespace   https://github.com/FenekkuKitsune/UserScripts
-// @version     3.1.1
+// @version     4.0.0
 //
 // @match       https://www.furaffinity.net/view/*
+// @match       https://www.furaffinity.net/*
 // @grant       GM_addStyle
 // @grant       GM_addElement
 //
@@ -13,15 +14,17 @@
 // ==/UserScript==
 const submissionViewer = new URLPattern({ pathname: '/view/*' });
 
-// Inject CSS
-const styles = `
+// Submission viewer styles
+const subViewerStyles = `
 /* Revert text-decoration changes to links. */
 a:hover {
 	text-decoration: none !important;
 }`;
-GM_addStyle(styles);
 
 if (submissionViewer.test(window.location)) {
+	// Add styles to the submission viewer page
+	GM_addStyle(subViewerStyles);
+
 	// Get the mini gallery navigation
 	const galleryNav = document.querySelector('.minigallery-navigation');
 
@@ -79,5 +82,59 @@ if (submissionViewer.test(window.location)) {
 		if (navOlder) {
 			createNavButton(navOlder, 'Older');
 		}
+	}
+}
+
+async function readAllAnnouncements() {
+	// Grab the announcement request key
+	try {
+		const response = await fetch('/announcements/', {
+			credentials: 'include'
+		});
+
+		if (!response.ok) {
+			console.error('Could not fetch announcements page');
+		} else {
+			const HTML = new DOMParser().parseFromString(
+				await response.text(),
+				'text/html'
+			);
+
+			const key = HTML.querySelector('#c-AnnouncementControls input[name=key]')?.value
+
+			if (key) {
+				const response = fetch('/announcements/', {
+					method: 'POST',
+					credentials: 'include',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
+					body: new URLSearchParams({
+						key: key,
+						mark_all_read: '1'
+					})
+				});
+
+				if (!response.ok) {
+					console.error('Could not mark announcements as read');
+				}
+			} else {
+				console.error('Could not fetch announcements key')
+			}
+		}
+	} catch (err) {
+		console.error('Error marking announcements as read:', err);
+	}
+}
+
+// If there's a current news banner
+if (document.querySelector('.news-block')?.children.length > 0) {
+	// Grab the dismiss button
+	const dismissButton = document.querySelector('#c-newsBlockDismiss');
+
+	if (dismissButton) {
+		dismissButton.addEventListener('click', readAllAnnouncements);
+	} else {
+		console.error('Cannot add event listener to null object; dismissButton');
 	}
 }
